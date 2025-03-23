@@ -1,0 +1,118 @@
+swagger: "2.0"
+info:
+    title: ""
+    version: 0.0.1
+host: localhost:80
+consumes:
+    - application/json
+    - application/xml
+    - application/gob
+produces:
+    - application/json
+    - application/xml
+    - application/gob
+paths:
+    /tasks/{taskId}/complete:
+        get:
+            tags:
+                - mktextr
+            summary: completeTask mktextr
+            operationId: mktextr#completeTask
+            parameters:
+                - name: taskId
+                  in: path
+                  description: Unique identifier
+                  required: true
+                  type: string
+                - name: CompleteTaskRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/TaskCompletionPayload'
+                    required:
+                        - texture
+            responses:
+                "204":
+                    description: No Content response.
+            schemes:
+                - http
+    /textures/{id}:
+        get:
+            tags:
+                - mktextr
+            summary: getTextureById mktextr
+            operationId: mktextr#getTextureById
+            parameters:
+                - name: id
+                  in: path
+                  description: Texture ID
+                  required: true
+                  type: string
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/TextureReferencePayload'
+            schemes:
+                - http
+definitions:
+    TaskCompletionPayload:
+        title: TaskCompletionPayload
+        type: object
+        properties:
+            texture:
+                type: string
+                description: The texture
+                example:
+                    - 78
+                    - 111
+                    - 110
+                    - 32
+                    - 111
+                    - 112
+                    - 116
+                    - 105
+                    - 111
+                    - 32
+                    - 109
+                    - 111
+                    - 108
+                    - 101
+                    - 115
+                    - 116
+                    - 105
+                    - 97
+                    - 101
+                    - 46
+                format: byte
+        description: Complete task
+        example:
+            texture:
+                - 69
+                - 115
+                - 116
+                - 32
+                - 97
+                - 115
+                - 112
+                - 101
+                - 114
+                - 105
+                - 111
+                - 114
+                - 101
+                - 115
+                - 46
+        required:
+            - texture
+    TextureReferencePayload:
+        title: TextureReferencePayload
+        type: object
+        properties:
+            id:
+                type: string
+                description: Unique identifier
+                example: Ab id quo.
+        description: Texture reference
+        example:
+            id: Quia deserunt sit ducimus maxime et velit.

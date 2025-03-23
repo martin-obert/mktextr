@@ -8,7 +8,10 @@ var _ = Service("mktextr", func() {
 	Description("Texture store")
 
 	Method("getTextureById", func() {
-		Payload(String, "Texture unique identifier")
+		Payload(func() {
+			Field(1, "id", String, "Texture ID")
+			Required("id")
+		})
 		Result(TextureReferencePayload, "Texture reference")
 
 		HTTP(func() {
