@@ -1,7 +1,7 @@
-package mktextr
+package domain
 
 type ITaskManager interface {
-	Enqueue(Task) (TaskHandle, error)
+	Enqueue(task Task) (TaskHandle, error)
 }
 
 type TaskManager struct {
@@ -13,6 +13,6 @@ func NewTaskManager(textureStorage ITextureStorage) *TaskManager {
 }
 
 func (t TaskManager) Enqueue(task Task) (TaskHandle, error) {
-	
+
 	return EmptyTaskHandle(), nil
 }
