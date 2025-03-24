@@ -30,11 +30,11 @@ var _ = Service("mktextr", func() {
 
 			Response(StatusPermanentRedirect, func() {
 				Header("Location")
-				Tag("Location", "value")
+				Tag("Location", "*")
 			})
 			Response(StatusAccepted, func() {
 				Header("X-mktextr-task-id")
-				Tag("X-mktextr-task-id", "value")
+				Tag("X-mktextr-task-id", "*")
 			})
 			Response(StatusInternalServerError)
 		})

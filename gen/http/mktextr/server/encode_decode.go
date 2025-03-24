@@ -48,14 +48,14 @@ func DecodeGetTextureByIDRequest(mux goahttp.Muxer, decoder func(*http.Request) 
 func EncodeGetTextureByCoordinatesResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
 		res, _ := v.(*mktextr.GetTextureByCoordinatesResult)
-		if res.Location != nil && *res.Location == "value" {
+		if res.Location != nil && *res.Location == "*" {
 			enc := encoder(ctx, w)
 			body := NewGetTextureByCoordinatesPermanentRedirectResponseBody(res)
 			w.Header().Set("Location", *res.Location)
 			w.WriteHeader(http.StatusPermanentRedirect)
 			return enc.Encode(body)
 		}
-		if res.XmktextrTaskID != nil && *res.XmktextrTaskID == "value" {
+		if res.XmktextrTaskID != nil && *res.XmktextrTaskID == "*" {
 			enc := encoder(ctx, w)
 			body := NewGetTextureByCoordinatesAcceptedResponseBody(res)
 			w.Header().Set("X-Mktextr-Task-Id", *res.XmktextrTaskID)

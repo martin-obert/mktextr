@@ -140,7 +140,7 @@ func DecodeGetTextureByCoordinatesResponse(decoder func(*http.Response) goahttp.
 				location = &locationRaw
 			}
 			res := NewGetTextureByCoordinatesResultPermanentRedirect(&body, location)
-			tmp := "value"
+			tmp := "*"
 			res.Location = &tmp
 			return res, nil
 		case http.StatusAccepted:
@@ -160,7 +160,7 @@ func DecodeGetTextureByCoordinatesResponse(decoder func(*http.Response) goahttp.
 				xmktextrTaskID = &xmktextrTaskIDRaw
 			}
 			res := NewGetTextureByCoordinatesResultAccepted(&body, xmktextrTaskID)
-			tmp := "value"
+			tmp := "*"
 			res.XmktextrTaskID = &tmp
 			return res, nil
 		case http.StatusInternalServerError:
