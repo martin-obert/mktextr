@@ -50,7 +50,12 @@ func NewGetTextureByIDEndpoint(s Service) goa.Endpoint {
 func NewGetTextureByCoordinatesEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*GetTextureByCoordinatesPayload)
-		return s.GetTextureByCoordinates(ctx, p)
+		res, err := s.GetTextureByCoordinates(ctx, p)
+		if err != nil {
+			return nil, err
+		}
+		vres := NewViewedGetResult(res, "default")
+		return vres, nil
 	}
 }
 

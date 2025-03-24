@@ -28,7 +28,7 @@ func UsageCommands() string {
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` mktextr get-texture-by-id --id "Et et dicta quae velit voluptates dolor."` + "\n" +
+	return os.Args[0] + ` mktextr get-texture-by-id --id "Ab id quo."` + "\n" +
 		""
 }
 
@@ -171,7 +171,7 @@ GetTextureByID implements getTextureById.
     -id STRING: Texture ID
 
 Example:
-    %[1]s mktextr get-texture-by-id --id "Et et dicta quae velit voluptates dolor."
+    %[1]s mktextr get-texture-by-id --id "Ab id quo."
 `, os.Args[0])
 }
 
@@ -184,7 +184,7 @@ GetTextureByCoordinates implements getTextureByCoordinates.
     -y INT: 
 
 Example:
-    %[1]s mktextr get-texture-by-coordinates --world-id "Cum sequi." --x 2890731354217571008 --y 4926212361102318830
+    %[1]s mktextr get-texture-by-coordinates --world-id "Quia deserunt sit ducimus maxime et velit." --x 5429597880375743933 --y 2225197571073222491
 `, os.Args[0])
 }
 
@@ -197,8 +197,8 @@ CompleteTask implements completeTask.
 
 Example:
     %[1]s mktextr complete-task --body '{
-      "file": "TmloaWwgcmVydW0gcXVpIGV0IGRvbG9yIHByYWVzZW50aXVtIGxhYm9ydW0u",
-      "filename": "Et earum."
-   }' --task-id "Voluptate vel voluptas."
+      "file": "VmVybyBkZXNlcnVudCByZW0gaWQgbW9sZXN0aWFlIHF1aWRlbSBuaWhpbC4=",
+      "filename": "Qui et."
+   }' --task-id "Praesentium laborum corporis et."
 `, os.Args[0])
 }

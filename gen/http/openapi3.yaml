@@ -20,8 +20,8 @@ paths:
                   schema:
                     type: string
                     description: ID of the task
-                    example: Dolorem similique non reprehenderit.
-                  example: Voluptate reprehenderit assumenda unde eius dicta harum.
+                    example: Odio praesentium.
+                  example: Nihil est ducimus in.
             requestBody:
                 required: true
                 content:
@@ -30,52 +30,51 @@ paths:
                             $ref: '#/components/schemas/CompleteTaskRequestBody'
                         example:
                             file:
-                                - 78
-                                - 105
-                                - 104
-                                - 105
-                                - 108
-                                - 32
+                                - 86
+                                - 101
                                 - 114
+                                - 111
+                                - 32
+                                - 100
+                                - 101
+                                - 115
                                 - 101
                                 - 114
                                 - 117
+                                - 110
+                                - 116
+                                - 32
+                                - 114
+                                - 101
                                 - 109
+                                - 32
+                                - 105
+                                - 100
+                                - 32
+                                - 109
+                                - 111
+                                - 108
+                                - 101
+                                - 115
+                                - 116
+                                - 105
+                                - 97
+                                - 101
                                 - 32
                                 - 113
                                 - 117
                                 - 105
-                                - 32
-                                - 101
-                                - 116
-                                - 32
                                 - 100
-                                - 111
-                                - 108
-                                - 111
-                                - 114
+                                - 101
+                                - 109
                                 - 32
-                                - 112
-                                - 114
-                                - 97
-                                - 101
-                                - 115
-                                - 101
                                 - 110
-                                - 116
                                 - 105
-                                - 117
-                                - 109
-                                - 32
+                                - 104
+                                - 105
                                 - 108
-                                - 97
-                                - 98
-                                - 111
-                                - 114
-                                - 117
-                                - 109
                                 - 46
-                            filename: Et earum.
+                            filename: Qui et.
             responses:
                 "200":
                     description: OK response.
@@ -94,8 +93,8 @@ paths:
                   schema:
                     type: string
                     description: WorldId
-                    example: Veniam error laudantium blanditiis vitae.
-                  example: Laborum excepturi in.
+                    example: Rerum accusamus.
+                  example: Doloribus quibusdam.
                 - name: x
                   in: query
                   description: Texture X
@@ -104,9 +103,9 @@ paths:
                   schema:
                     type: integer
                     description: Texture X
-                    example: 1456253771579284881
+                    example: 4748271283784381903
                     format: int64
-                  example: 4543348245675884403
+                  example: 7523923742862776932
                 - name: "y"
                   in: query
                   description: Texture Y
@@ -115,47 +114,40 @@ paths:
                   schema:
                     type: integer
                     description: Texture Y
-                    example: 7231606873395887560
+                    example: 276245859482169956
                     format: int64
-                  example: 4373127890911828100
+                  example: 3784236015956481100
             responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/MktextrGetTextureByCoordinatesOKResponseBody'
+                            example:
+                                baseMapUrl: Facere quibusdam.
+                                contourMapUrl: Dolore voluptatem incidunt.
+                                taskId: Molestiae nam est asperiores.
                 "202":
                     description: Accepted response.
-                    headers:
-                        X-mktextr-task-id:
-                            schema:
-                                type: string
-                                example: Voluptatem tenetur eius optio consequatur.
-                            example: Esse veniam omnis tempora sint non.
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetTextureByCoordinatesAcceptedResponseBody'
+                                $ref: '#/components/schemas/MktextrGetTextureByCoordinatesOKResponseBody'
                             example:
-                                Location: Asperiores praesentium.
-                "308":
-                    description: Permanent Redirect response.
-                    headers:
-                        Location:
-                            schema:
-                                type: string
-                                example: Adipisci omnis.
-                            example: Corporis beatae vero qui voluptatem.
+                                baseMapUrl: Facere quibusdam.
+                                contourMapUrl: Dolore voluptatem incidunt.
+                                taskId: Molestiae nam est asperiores.
+                "400":
+                    description: Bad Request response.
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetTextureByCoordinatesPermanentRedirectResponseBody'
+                                $ref: '#/components/schemas/MktextrGetTextureByCoordinatesOKResponseBody'
                             example:
-                                X-mktextr-task-id: Deserunt sit ducimus.
-                "500":
-                    description: Internal Server Error response.
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/GetTextureByCoordinatesInternalServerErrorResponseBody'
-                            example:
-                                Location: Nihil autem et vero deserunt.
-                                X-mktextr-task-id: Quibusdam eveniet dolore voluptatem incidunt eveniet.
+                                baseMapUrl: Facere quibusdam.
+                                contourMapUrl: Dolore voluptatem incidunt.
+                                taskId: Molestiae nam est asperiores.
     /textures/{id}:
         get:
             tags:
@@ -170,8 +162,8 @@ paths:
                   schema:
                     type: string
                     description: Texture ID
-                    example: Qui aliquid sapiente.
-                  example: Enim nihil.
+                    example: Consequuntur quia assumenda.
+                  example: Est eaque dolorum.
             responses:
                 "204":
                     description: No Content response.
@@ -184,122 +176,127 @@ components:
                     type: string
                     description: The file to upload
                     example:
-                        - 79
-                        - 112
+                        - 69
                         - 116
-                        - 105
-                        - 111
-                        - 32
-                        - 109
-                        - 111
-                        - 108
-                        - 101
-                        - 115
-                        - 116
-                        - 105
-                        - 97
-                        - 101
                         - 32
                         - 100
                         - 111
                         - 108
                         - 111
                         - 114
-                        - 101
-                        - 109
-                        - 113
-                        - 117
-                        - 101
-                        - 32
-                        - 118
-                        - 111
-                        - 108
-                        - 117
-                        - 112
-                        - 116
-                        - 97
-                        - 116
-                        - 101
-                        - 32
-                        - 113
-                        - 117
                         - 105
-                        - 97
-                        - 32
+                        - 98
+                        - 117
                         - 115
-                        - 101
-                        - 113
+                        - 32
                         - 117
+                        - 116
+                        - 32
                         - 105
+                        - 112
+                        - 115
+                        - 97
                         - 32
                         - 101
+                        - 116
+                        - 32
+                        - 101
+                        - 116
+                        - 32
                         - 97
+                        - 117
+                        - 116
                         - 46
                     format: binary
                 filename:
                     type: string
                     description: Name of the file
-                    example: A aut assumenda ipsum culpa maiores.
+                    example: Alias omnis et.
             example:
                 file:
-                    - 65
+                    - 69
+                    - 115
+                    - 115
+                    - 101
+                    - 32
+                    - 115
+                    - 117
+                    - 115
+                    - 99
+                    - 105
+                    - 112
+                    - 105
+                    - 116
+                    - 32
+                    - 118
+                    - 101
+                    - 114
+                    - 105
+                    - 116
+                    - 97
+                    - 116
+                    - 105
+                    - 115
+                    - 32
+                    - 97
                     - 108
                     - 105
                     - 113
                     - 117
-                    - 105
-                    - 100
-                    - 32
-                    - 111
+                    - 97
                     - 109
-                    - 110
-                    - 105
-                    - 115
                     - 32
-                    - 110
-                    - 105
-                    - 115
-                    - 105
-                    - 32
-                    - 98
+                    - 100
                     - 101
-                    - 97
+                    - 108
+                    - 101
+                    - 110
+                    - 105
                     - 116
-                    - 97
-                    - 101
+                    - 105
                     - 46
-                filename: Sed dolor dolores.
+                filename: In quia pariatur.
             required:
                 - file
                 - filename
-        GetTextureByCoordinatesAcceptedResponseBody:
+        GetResult:
             type: object
             properties:
-                Location:
+                baseMapUrl:
                     type: string
-                    example: Numquam nesciunt.
+                    example: Enim nihil.
+                contourMapUrl:
+                    type: string
+                    example: Veniam error laudantium blanditiis vitae.
+                status_code:
+                    type: string
+                    example: Sed dolor dolores.
+                taskId:
+                    type: string
+                    example: Qui aliquid sapiente.
+            description: Texture set payload
             example:
-                Location: Sunt nam iusto est ratione eum ut.
-        GetTextureByCoordinatesInternalServerErrorResponseBody:
+                baseMapUrl: Exercitationem dolor debitis nisi voluptatem aut perferendis.
+                contourMapUrl: Corporis beatae vero qui voluptatem.
+                status_code: Laborum excepturi in.
+                taskId: Ab possimus quia molestias adipisci omnis.
+        MktextrGetTextureByCoordinatesOKResponseBody:
             type: object
             properties:
-                Location:
+                baseMapUrl:
                     type: string
-                    example: Et tempore quia accusamus aut eaque atque.
-                X-mktextr-task-id:
+                    example: Quos at.
+                contourMapUrl:
                     type: string
-                    example: Iste quis.
+                    example: Esse veniam omnis tempora sint non.
+                taskId:
+                    type: string
+                    example: Voluptatem tenetur eius optio consequatur.
+            description: GetTextureByCoordinatesOKResponseBody result type (default view)
             example:
-                Location: Facere dicta consequatur dolores rerum.
-                X-mktextr-task-id: Sed est commodi dolor ut.
-        GetTextureByCoordinatesPermanentRedirectResponseBody:
-            type: object
-            properties:
-                X-mktextr-task-id:
-                    type: string
-                    example: Dolorem quae sunt sapiente omnis.
-            example:
-                X-mktextr-task-id: Voluptatibus vel.
+                baseMapUrl: Voluptate reprehenderit assumenda unde eius dicta harum.
+                contourMapUrl: Alias aspernatur fugiat sint.
+                taskId: Dolorem similique non reprehenderit.
 tags:
     - name: mktextr
       description: Texture store

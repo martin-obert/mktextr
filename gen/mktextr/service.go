@@ -9,6 +9,7 @@ package mktextr
 
 import (
 	"context"
+	mktextrviews "mktextr/gen/mktextr/views"
 )
 
 // Texture store
@@ -16,7 +17,7 @@ type Service interface {
 	// GetTextureByID implements getTextureById.
 	GetTextureByID(context.Context, *GetTextureByIDPayload) (err error)
 	// GetTextureByCoordinates implements getTextureByCoordinates.
-	GetTextureByCoordinates(context.Context, *GetTextureByCoordinatesPayload) (res *GetTextureByCoordinatesResult, err error)
+	GetTextureByCoordinates(context.Context, *GetTextureByCoordinatesPayload) (res *GetResult, err error)
 	// CompleteTask implements completeTask.
 	CompleteTask(context.Context, *CompleteTaskPayload) (err error)
 }
@@ -48,6 +49,15 @@ type CompleteTaskPayload struct {
 	TaskID string
 }
 
+// GetResult is the result type of the mktextr service getTextureByCoordinates
+// method.
+type GetResult struct {
+	StatusCode    *string
+	TaskID        *string
+	BaseMapURL    *string
+	ContourMapURL *string
+}
+
 // GetTextureByCoordinatesPayload is the payload type of the mktextr service
 // getTextureByCoordinates method.
 type GetTextureByCoordinatesPayload struct {
@@ -59,16 +69,43 @@ type GetTextureByCoordinatesPayload struct {
 	WorldID string
 }
 
-// GetTextureByCoordinatesResult is the result type of the mktextr service
-// getTextureByCoordinates method.
-type GetTextureByCoordinatesResult struct {
-	XmktextrTaskID *string
-	Location       *string
-}
-
 // GetTextureByIDPayload is the payload type of the mktextr service
 // getTextureById method.
 type GetTextureByIDPayload struct {
 	// Texture ID
 	ID string
+}
+
+// NewGetResult initializes result type GetResult from viewed result type
+// GetResult.
+func NewGetResult(vres *mktextrviews.GetResult) *GetResult {
+	return newGetResult(vres.Projected)
+}
+
+// NewViewedGetResult initializes viewed result type GetResult from result type
+// GetResult using the given view.
+func NewViewedGetResult(res *GetResult, view string) *mktextrviews.GetResult {
+	p := newGetResultView(res)
+	return &mktextrviews.GetResult{Projected: p, View: "default"}
+}
+
+// newGetResult converts projected type GetResult to service type GetResult.
+func newGetResult(vres *mktextrviews.GetResultView) *GetResult {
+	res := &GetResult{
+		TaskID:        vres.TaskID,
+		BaseMapURL:    vres.BaseMapURL,
+		ContourMapURL: vres.ContourMapURL,
+	}
+	return res
+}
+
+// newGetResultView projects result type GetResult to projected type
+// GetResultView using the "default" view.
+func newGetResultView(res *GetResult) *mktextrviews.GetResultView {
+	vres := &mktextrviews.GetResultView{
+		TaskID:        res.TaskID,
+		BaseMapURL:    res.BaseMapURL,
+		ContourMapURL: res.ContourMapURL,
+	}
+	return vres
 }

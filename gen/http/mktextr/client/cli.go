@@ -71,7 +71,7 @@ func BuildCompleteTaskPayload(mktextrCompleteTaskBody string, mktextrCompleteTas
 	{
 		err = json.Unmarshal([]byte(mktextrCompleteTaskBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"file\": \"TmloaWwgcmVydW0gcXVpIGV0IGRvbG9yIHByYWVzZW50aXVtIGxhYm9ydW0u\",\n      \"filename\": \"Et earum.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"file\": \"VmVybyBkZXNlcnVudCByZW0gaWQgbW9sZXN0aWFlIHF1aWRlbSBuaWhpbC4=\",\n      \"filename\": \"Qui et.\"\n   }'")
 		}
 		if body.File == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("file", "body"))

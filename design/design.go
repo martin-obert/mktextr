@@ -28,15 +28,13 @@ var _ = Service("mktextr", func() {
 			Param("x", Int, "Texture X")
 			Param("y", Int, "Texture Y")
 
-			Response(StatusPermanentRedirect, func() {
-				Header("Location")
-				Tag("Location", "*")
+			Response(StatusOK, func() {
+				Tag("status_code", "ok")
 			})
 			Response(StatusAccepted, func() {
-				Header("X-mktextr-task-id")
-				Tag("X-mktextr-task-id", "*")
+				Tag("status_code", "accepted")
 			})
-			Response(StatusInternalServerError)
+			Response(StatusBadRequest)
 		})
 		Payload(func() {
 			Field(1, "x", Int, "Texture X")
@@ -44,9 +42,8 @@ var _ = Service("mktextr", func() {
 			Field(1, "worldId", String, "WorldId")
 			Required("x", "y", "worldId")
 		})
-		Result(func() {
-			Attribute("X-mktextr-task-id", String)
-			Attribute("Location", String)
+		Result(GetTextureByCoordinatesResponse, func() {
+			View("default")
 		})
 	})
 
@@ -68,5 +65,23 @@ var _ = Service("mktextr", func() {
 			MultipartRequest()
 			Response(StatusOK)
 		})
+	})
+})
+
+var GetTextureByCoordinatesResponse = ResultType("application/get-result", func() {
+	Description("Texture set payload")
+	Field(1, "status_code", String)
+
+	Attributes(func() {
+		Attribute("status_code", String)
+		Attribute("taskId", String, "")
+		Attribute("baseMapUrl", String, "")
+		Attribute("contourMapUrl", String, "")
+	})
+
+	View("default", func() {
+		Attribute("taskId", String, "")
+		Attribute("baseMapUrl", String, "")
+		Attribute("contourMapUrl", String, "")
 	})
 })

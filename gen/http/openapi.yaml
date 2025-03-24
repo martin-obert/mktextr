@@ -62,24 +62,18 @@ paths:
                   required: true
                   type: integer
             responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/MktextrGetTextureByCoordinatesOKResponseBody'
                 "202":
                     description: Accepted response.
                     schema:
                         $ref: '#/definitions/MktextrGetTextureByCoordinatesAcceptedResponseBody'
-                    headers:
-                        X-mktextr-task-id:
-                            type: string
-                "308":
-                    description: Permanent Redirect response.
+                "400":
+                    description: Bad Request response.
                     schema:
-                        $ref: '#/definitions/MktextrGetTextureByCoordinatesPermanentRedirectResponseBody'
-                    headers:
-                        Location:
-                            type: string
-                "500":
-                    description: Internal Server Error response.
-                    schema:
-                        $ref: '#/definitions/MktextrGetTextureByCoordinatesInternalServerErrorResponseBody'
+                        $ref: '#/definitions/MktextrGetTextureByCoordinatesBadRequestResponseBody'
             schemes:
                 - http
     /textures/{id}:
@@ -108,74 +102,143 @@ definitions:
                 type: string
                 description: The file to upload
                 example:
-                    - 86
-                    - 101
-                    - 108
-                    - 105
-                    - 116
-                    - 32
-                    - 112
-                    - 108
+                    - 70
                     - 97
                     - 99
                     - 101
+                    - 114
+                    - 101
+                    - 32
+                    - 100
+                    - 105
+                    - 99
+                    - 116
+                    - 97
+                    - 32
+                    - 99
+                    - 111
+                    - 110
+                    - 115
+                    - 101
+                    - 113
+                    - 117
                     - 97
                     - 116
+                    - 117
+                    - 114
+                    - 32
+                    - 100
+                    - 111
+                    - 108
+                    - 111
+                    - 114
+                    - 101
+                    - 115
+                    - 32
+                    - 114
+                    - 101
+                    - 114
+                    - 117
+                    - 109
                     - 46
                 format: byte
             filename:
                 type: string
                 description: Name of the file
-                example: Voluptate dolorem quia.
+                example: Optio molestiae doloremque voluptate quia sequi ea.
         example:
             file:
-                - 83
+                - 65
+                - 32
                 - 97
+                - 117
+                - 116
+                - 32
+                - 97
+                - 115
+                - 115
+                - 117
+                - 109
                 - 101
+                - 110
+                - 100
+                - 97
+                - 32
+                - 105
                 - 112
-                - 101
+                - 115
+                - 117
+                - 109
                 - 32
+                - 99
+                - 117
+                - 108
+                - 112
                 - 97
-                - 116
-                - 113
-                - 117
-                - 101
                 - 32
-                - 117
-                - 116
+                - 109
+                - 97
+                - 105
+                - 111
+                - 114
+                - 101
+                - 115
                 - 46
-            filename: Quos est ad ut voluptatibus.
+            filename: Aliquid omnis nisi beatae.
         required:
             - file
             - filename
     MktextrGetTextureByCoordinatesAcceptedResponseBody:
-        title: MktextrGetTextureByCoordinatesAcceptedResponseBody
+        title: 'Mediatype identifier: application/get-result; view=default'
         type: object
         properties:
-            Location:
+            baseMapUrl:
                 type: string
-                example: Odio fugit nemo dolorem voluptas consequatur impedit.
+                example: Cupiditate ut et quasi sit doloremque ut.
+            contourMapUrl:
+                type: string
+                example: Velit et repudiandae.
+            taskId:
+                type: string
+                example: Saepe iure repellendus perferendis quasi et.
+        description: GetTextureByCoordinatesAcceptedResponseBody result type (default view)
         example:
-            Location: Adipisci consectetur voluptate quia sunt saepe.
-    MktextrGetTextureByCoordinatesInternalServerErrorResponseBody:
-        title: MktextrGetTextureByCoordinatesInternalServerErrorResponseBody
+            baseMapUrl: Dolorem quia consequatur saepe atque ut nesciunt.
+            contourMapUrl: Est ad ut voluptatibus est dolorem quae.
+            taskId: Autem velit placeat et.
+    MktextrGetTextureByCoordinatesBadRequestResponseBody:
+        title: 'Mediatype identifier: application/get-result; view=default'
         type: object
         properties:
-            Location:
+            baseMapUrl:
                 type: string
-                example: Et non cupiditate ut et quasi sit.
-            X-mktextr-task-id:
+                example: Vel corporis numquam nesciunt quia sunt.
+            contourMapUrl:
                 type: string
-                example: Repellendus perferendis.
+                example: Iusto est ratione eum ut.
+            taskId:
+                type: string
+                example: Sapiente omnis ipsam.
+        description: GetTextureByCoordinatesBad RequestResponseBody result type (default view)
         example:
-            Location: Repudiandae animi.
-            X-mktextr-task-id: Ut rerum velit.
-    MktextrGetTextureByCoordinatesPermanentRedirectResponseBody:
-        title: MktextrGetTextureByCoordinatesPermanentRedirectResponseBody
+            baseMapUrl: Et tempore quia accusamus aut eaque atque.
+            contourMapUrl: Sed est commodi dolor ut.
+            taskId: Iste quis.
+    MktextrGetTextureByCoordinatesOKResponseBody:
+        title: 'Mediatype identifier: application/get-result; view=default'
         type: object
         properties:
-            X-mktextr-task-id:
+            baseMapUrl:
                 type: string
-                example: Eveniet possimus possimus aut quia.
+                example: Possimus possimus aut.
+            contourMapUrl:
+                type: string
+                example: Impedit recusandae reprehenderit et repellat qui.
+            taskId:
+                type: string
+                example: Temporibus voluptate vel voluptas velit.
+        description: GetTextureByCoordinatesOKResponseBody result type (default view)
         example:
-            X-mktextr-task-id: Recusandae reprehenderit et repellat qui et dicta.
+            baseMapUrl: Fugit nemo dolorem.
+            contourMapUrl: Consequatur impedit voluptas adipisci consectetur voluptate quia.
+            taskId: Dicta maxime.

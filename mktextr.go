@@ -2,7 +2,6 @@ package mktextrapi
 
 import (
 	"context"
-	"errors"
 	"mktextr/data_access"
 	"mktextr/domain"
 	mktextr "mktextr/gen/mktextr"
@@ -18,34 +17,49 @@ type mktextrsrvc struct {
 	textureStorage domain.ITextureStorage
 }
 
+func (m mktextrsrvc) GetTextureByCoordinates(ctx context.Context, payload *mktextr.GetTextureByCoordinatesPayload) (res *mktextr.GetResult, err error) {
+	statusCode := "accepted"
+	bmUrl := "bmap"
+	cmUrl := "cmap"
+	res = &mktextr.GetResult{
+		TaskID:        &bmUrl,
+		StatusCode:    &statusCode,
+		BaseMapURL:    &bmUrl,
+		ContourMapURL: &cmUrl,
+	}
+	return res, nil
+}
+
 func (m mktextrsrvc) GetTextureByID(ctx context.Context, payload *mktextr.GetTextureByIDPayload) (err error) {
 	//TODO implement me
 	panic("implement me")
+
 }
 
-func (m mktextrsrvc) GetTextureByCoordinates(ctx context.Context, payload *mktextr.GetTextureByCoordinatesPayload) (res *mktextr.GetTextureByCoordinatesResult, err error) {
-	texRef, err := m.repository.GetTextureRefByCoordinates(ctx, payload.WorldID, payload.X, payload.Y)
-	if err != nil {
-		if errors.Is(err, domain.TextureRefNotFound) {
-			t, cErr := m.taskManager.CreateTextureRenderingTask(ctx, payload.WorldID, payload.X, payload.Y)
-			if cErr != nil {
-				return nil, cErr
-			}
+//func (m mktextrsrvc) GetTextureByCoordinates(ctx context.Context, payload *mktextr.GetTextureByCoordinatesPayload) (res *mktextr.GetTextureByCoordinatesResult, err error) {
 
-			return &mktextr.GetTextureByCoordinatesResult{
-				XmktextrTaskID: &t,
-				Location:       nil,
-			}, nil
-		}
-
-		return nil, err
-	}
-
-	return &mktextr.GetTextureByCoordinatesResult{
-		Location:       &texRef.Uri,
-		XmktextrTaskID: nil,
-	}, nil
-}
+//texRef, err := m.repository.GetTextureRefByCoordinates(ctx, payload.WorldID, payload.X, payload.Y)
+//if err != nil {
+//	if errors.Is(err, domain.TextureRefNotFound) {
+//		t, cErr := m.taskManager.CreateTextureRenderingTask(ctx, payload.WorldID, payload.X, payload.Y)
+//		if cErr != nil {
+//			return nil, cErr
+//		}
+//
+//		return &mktextr.GetTextureByCoordinatesResult{
+//			XmktextrTaskID: &t,
+//			Location:       nil,
+//		}, nil
+//	}
+//
+//	return nil, err
+//}
+//
+//return &mktextr.GetTextureByCoordinatesResult{
+//	Location:       &texRef.Uri,
+//	XmktextrTaskID: nil,
+//}, nil
+//}
 
 func (m mktextrsrvc) CompleteTask(ctx context.Context, payload *mktextr.CompleteTaskPayload) (err error) {
 	//TODO implement me

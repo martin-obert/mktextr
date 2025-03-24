@@ -37,13 +37,13 @@ func (c *Client) GetTextureByID(ctx context.Context, p *GetTextureByIDPayload) (
 
 // GetTextureByCoordinates calls the "getTextureByCoordinates" endpoint of the
 // "mktextr" service.
-func (c *Client) GetTextureByCoordinates(ctx context.Context, p *GetTextureByCoordinatesPayload) (res *GetTextureByCoordinatesResult, err error) {
+func (c *Client) GetTextureByCoordinates(ctx context.Context, p *GetTextureByCoordinatesPayload) (res *GetResult, err error) {
 	var ires any
 	ires, err = c.GetTextureByCoordinatesEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
-	return ires.(*GetTextureByCoordinatesResult), nil
+	return ires.(*GetResult), nil
 }
 
 // CompleteTask calls the "completeTask" endpoint of the "mktextr" service.

@@ -11,6 +11,7 @@ import (
 	"context"
 	"errors"
 	mktextr "mktextr/gen/mktextr"
+	mktextrviews "mktextr/gen/mktextr/views"
 	"net/http"
 	"strconv"
 
@@ -47,24 +48,22 @@ func DecodeGetTextureByIDRequest(mux goahttp.Muxer, decoder func(*http.Request) 
 // returned by the mktextr getTextureByCoordinates endpoint.
 func EncodeGetTextureByCoordinatesResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
-		res, _ := v.(*mktextr.GetTextureByCoordinatesResult)
-		if res.Location != nil && *res.Location == "*" {
+		res := v.(*mktextrviews.GetResult)
+		if res.Projected.StatusCode != nil && *res.Projected.StatusCode == "ok" {
 			enc := encoder(ctx, w)
-			body := NewGetTextureByCoordinatesPermanentRedirectResponseBody(res)
-			w.Header().Set("Location", *res.Location)
-			w.WriteHeader(http.StatusPermanentRedirect)
+			body := NewGetTextureByCoordinatesOKResponseBody(res.Projected)
+			w.WriteHeader(http.StatusOK)
 			return enc.Encode(body)
 		}
-		if res.XmktextrTaskID != nil && *res.XmktextrTaskID == "*" {
+		if res.Projected.StatusCode != nil && *res.Projected.StatusCode == "accepted" {
 			enc := encoder(ctx, w)
-			body := NewGetTextureByCoordinatesAcceptedResponseBody(res)
-			w.Header().Set("X-Mktextr-Task-Id", *res.XmktextrTaskID)
+			body := NewGetTextureByCoordinatesAcceptedResponseBody(res.Projected)
 			w.WriteHeader(http.StatusAccepted)
 			return enc.Encode(body)
 		}
 		enc := encoder(ctx, w)
-		body := NewGetTextureByCoordinatesInternalServerErrorResponseBody(res)
-		w.WriteHeader(http.StatusInternalServerError)
+		body := NewGetTextureByCoordinatesBadRequestResponseBody(res.Projected)
+		w.WriteHeader(http.StatusBadRequest)
 		return enc.Encode(body)
 	}
 }
