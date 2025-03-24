@@ -18,9 +18,10 @@ import (
 
 // Server lists the mktextr service endpoint HTTP handlers.
 type Server struct {
-	Mounts         []*MountPoint
-	GetTextureByID http.Handler
-	CompleteTask   http.Handler
+	Mounts                  []*MountPoint
+	GetTextureByID          http.Handler
+	GetTextureByCoordinates http.Handler
+	CompleteTask            http.Handler
 }
 
 // MountPoint holds information about the mounted endpoints.
@@ -51,10 +52,12 @@ func New(
 	return &Server{
 		Mounts: []*MountPoint{
 			{"GetTextureByID", "GET", "/textures/{id}"},
+			{"GetTextureByCoordinates", "GET", "/textures"},
 			{"CompleteTask", "GET", "/tasks/{taskId}/complete"},
 		},
-		GetTextureByID: NewGetTextureByIDHandler(e.GetTextureByID, mux, decoder, encoder, errhandler, formatter),
-		CompleteTask:   NewCompleteTaskHandler(e.CompleteTask, mux, decoder, encoder, errhandler, formatter),
+		GetTextureByID:          NewGetTextureByIDHandler(e.GetTextureByID, mux, decoder, encoder, errhandler, formatter),
+		GetTextureByCoordinates: NewGetTextureByCoordinatesHandler(e.GetTextureByCoordinates, mux, decoder, encoder, errhandler, formatter),
+		CompleteTask:            NewCompleteTaskHandler(e.CompleteTask, mux, decoder, encoder, errhandler, formatter),
 	}
 }
 
@@ -64,6 +67,7 @@ func (s *Server) Service() string { return "mktextr" }
 // Use wraps the server handlers with the given middleware.
 func (s *Server) Use(m func(http.Handler) http.Handler) {
 	s.GetTextureByID = m(s.GetTextureByID)
+	s.GetTextureByCoordinates = m(s.GetTextureByCoordinates)
 	s.CompleteTask = m(s.CompleteTask)
 }
 
@@ -73,6 +77,7 @@ func (s *Server) MethodNames() []string { return mktextr.MethodNames[:] }
 // Mount configures the mux to serve the mktextr endpoints.
 func Mount(mux goahttp.Muxer, h *Server) {
 	MountGetTextureByIDHandler(mux, h.GetTextureByID)
+	MountGetTextureByCoordinatesHandler(mux, h.GetTextureByCoordinates)
 	MountCompleteTaskHandler(mux, h.CompleteTask)
 }
 
@@ -111,6 +116,58 @@ func NewGetTextureByIDHandler(
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
 		ctx = context.WithValue(ctx, goa.MethodKey, "getTextureById")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "mktextr")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		res, err := endpoint(ctx, payload)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			errhandler(ctx, w, err)
+		}
+	})
+}
+
+// MountGetTextureByCoordinatesHandler configures the mux to serve the
+// "mktextr" service "getTextureByCoordinates" endpoint.
+func MountGetTextureByCoordinatesHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("GET", "/textures", f)
+}
+
+// NewGetTextureByCoordinatesHandler creates a HTTP handler which loads the
+// HTTP request and calls the "mktextr" service "getTextureByCoordinates"
+// endpoint.
+func NewGetTextureByCoordinatesHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	decoder func(*http.Request) goahttp.Decoder,
+	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	errhandler func(context.Context, http.ResponseWriter, error),
+	formatter func(ctx context.Context, err error) goahttp.Statuser,
+) http.Handler {
+	var (
+		decodeRequest  = DecodeGetTextureByCoordinatesRequest(mux, decoder)
+		encodeResponse = EncodeGetTextureByCoordinatesResponse(encoder)
+		encodeError    = goahttp.ErrorEncoder(encoder, formatter)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "getTextureByCoordinates")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "mktextr")
 		payload, err := decodeRequest(r)
 		if err != nil {

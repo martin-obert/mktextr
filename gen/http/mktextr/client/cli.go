@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	mktextr "mktextr/gen/mktextr"
+	"strconv"
 
 	goa "goa.design/goa/v3/pkg"
 )
@@ -28,6 +29,40 @@ func BuildGetTextureByIDPayload(mktextrGetTextureByIDID string) (*mktextr.GetTex
 	return v, nil
 }
 
+// BuildGetTextureByCoordinatesPayload builds the payload for the mktextr
+// getTextureByCoordinates endpoint from CLI flags.
+func BuildGetTextureByCoordinatesPayload(mktextrGetTextureByCoordinatesWorldID string, mktextrGetTextureByCoordinatesX string, mktextrGetTextureByCoordinatesY string) (*mktextr.GetTextureByCoordinatesPayload, error) {
+	var err error
+	var worldID string
+	{
+		worldID = mktextrGetTextureByCoordinatesWorldID
+	}
+	var x int
+	{
+		var v int64
+		v, err = strconv.ParseInt(mktextrGetTextureByCoordinatesX, 10, strconv.IntSize)
+		x = int(v)
+		if err != nil {
+			return nil, fmt.Errorf("invalid value for x, must be INT")
+		}
+	}
+	var y int
+	{
+		var v int64
+		v, err = strconv.ParseInt(mktextrGetTextureByCoordinatesY, 10, strconv.IntSize)
+		y = int(v)
+		if err != nil {
+			return nil, fmt.Errorf("invalid value for y, must be INT")
+		}
+	}
+	v := &mktextr.GetTextureByCoordinatesPayload{}
+	v.WorldID = worldID
+	v.X = x
+	v.Y = y
+
+	return v, nil
+}
+
 // BuildCompleteTaskPayload builds the payload for the mktextr completeTask
 // endpoint from CLI flags.
 func BuildCompleteTaskPayload(mktextrCompleteTaskBody string, mktextrCompleteTaskTaskID string) (*mktextr.TaskCompletionPayload, error) {
@@ -36,7 +71,7 @@ func BuildCompleteTaskPayload(mktextrCompleteTaskBody string, mktextrCompleteTas
 	{
 		err = json.Unmarshal([]byte(mktextrCompleteTaskBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"texture\": \"RGljdGEgcXVhZSB2ZWxpdCB2b2x1cHRhdGVzIGRvbG9yLg==\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"texture\": \"Tm9uIG9wdGlvIG1vbGVzdGlhZS4=\"\n   }'")
 		}
 		if body.Texture == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("texture", "body"))

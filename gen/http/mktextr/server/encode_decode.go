@@ -13,6 +13,7 @@ import (
 	"io"
 	mktextr "mktextr/gen/mktextr"
 	"net/http"
+	"strconv"
 
 	goahttp "goa.design/goa/v3/http"
 	goa "goa.design/goa/v3/pkg"
@@ -41,6 +42,64 @@ func DecodeGetTextureByIDRequest(mux goahttp.Muxer, decoder func(*http.Request) 
 		)
 		id = params["id"]
 		payload := NewGetTextureByIDPayload(id)
+
+		return payload, nil
+	}
+}
+
+// EncodeGetTextureByCoordinatesResponse returns an encoder for responses
+// returned by the mktextr getTextureByCoordinates endpoint.
+func EncodeGetTextureByCoordinatesResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
+	return func(ctx context.Context, w http.ResponseWriter, v any) error {
+		res, _ := v.(*mktextr.TextureReferencePayload)
+		enc := encoder(ctx, w)
+		body := NewGetTextureByCoordinatesResponseBody(res)
+		w.WriteHeader(http.StatusOK)
+		return enc.Encode(body)
+	}
+}
+
+// DecodeGetTextureByCoordinatesRequest returns a decoder for requests sent to
+// the mktextr getTextureByCoordinates endpoint.
+func DecodeGetTextureByCoordinatesRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (any, error) {
+	return func(r *http.Request) (any, error) {
+		var (
+			worldID string
+			x       int
+			y       int
+			err     error
+		)
+		qp := r.URL.Query()
+		worldID = qp.Get("worldId")
+		if worldID == "" {
+			err = goa.MergeErrors(err, goa.MissingFieldError("worldId", "query string"))
+		}
+		{
+			xRaw := qp.Get("x")
+			if xRaw == "" {
+				err = goa.MergeErrors(err, goa.MissingFieldError("x", "query string"))
+			}
+			v, err2 := strconv.ParseInt(xRaw, 10, strconv.IntSize)
+			if err2 != nil {
+				err = goa.MergeErrors(err, goa.InvalidFieldTypeError("x", xRaw, "integer"))
+			}
+			x = int(v)
+		}
+		{
+			yRaw := qp.Get("y")
+			if yRaw == "" {
+				err = goa.MergeErrors(err, goa.MissingFieldError("y", "query string"))
+			}
+			v, err2 := strconv.ParseInt(yRaw, 10, strconv.IntSize)
+			if err2 != nil {
+				err = goa.MergeErrors(err, goa.InvalidFieldTypeError("y", yRaw, "integer"))
+			}
+			y = int(v)
+		}
+		if err != nil {
+			return nil, err
+		}
+		payload := NewGetTextureByCoordinatesPayload(worldID, x, y)
 
 		return payload, nil
 	}

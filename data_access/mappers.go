@@ -1,6 +1,6 @@
 package data_access
 
-import "mktextr/m/domain"
+import "mktextr/domain"
 
 func toDomain(model TextureRefDataModel) domain.TextureRef {
 	return domain.TextureRef{

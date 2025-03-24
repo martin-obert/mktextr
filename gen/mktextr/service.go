@@ -15,6 +15,8 @@ import (
 type Service interface {
 	// GetTextureByID implements getTextureById.
 	GetTextureByID(context.Context, *GetTextureByIDPayload) (res *TextureReferencePayload, err error)
+	// GetTextureByCoordinates implements getTextureByCoordinates.
+	GetTextureByCoordinates(context.Context, *GetTextureByCoordinatesPayload) (res *TextureReferencePayload, err error)
 	// CompleteTask implements completeTask.
 	CompleteTask(context.Context, *TaskCompletionPayload) (err error)
 }
@@ -33,7 +35,18 @@ const ServiceName = "mktextr"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [2]string{"getTextureById", "completeTask"}
+var MethodNames = [3]string{"getTextureById", "getTextureByCoordinates", "completeTask"}
+
+// GetTextureByCoordinatesPayload is the payload type of the mktextr service
+// getTextureByCoordinates method.
+type GetTextureByCoordinatesPayload struct {
+	// Texture X
+	X int
+	// Texture y
+	Y int
+	// WorldId
+	WorldID string
+}
 
 // GetTextureByIDPayload is the payload type of the mktextr service
 // getTextureById method.

@@ -21,6 +21,10 @@ type Client struct {
 	// getTextureById endpoint.
 	GetTextureByIDDoer goahttp.Doer
 
+	// GetTextureByCoordinates Doer is the HTTP client used to make requests to the
+	// getTextureByCoordinates endpoint.
+	GetTextureByCoordinatesDoer goahttp.Doer
+
 	// CompleteTask Doer is the HTTP client used to make requests to the
 	// completeTask endpoint.
 	CompleteTaskDoer goahttp.Doer
@@ -45,13 +49,14 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
-		GetTextureByIDDoer:  doer,
-		CompleteTaskDoer:    doer,
-		RestoreResponseBody: restoreBody,
-		scheme:              scheme,
-		host:                host,
-		decoder:             dec,
-		encoder:             enc,
+		GetTextureByIDDoer:          doer,
+		GetTextureByCoordinatesDoer: doer,
+		CompleteTaskDoer:            doer,
+		RestoreResponseBody:         restoreBody,
+		scheme:                      scheme,
+		host:                        host,
+		decoder:                     dec,
+		encoder:                     enc,
 	}
 }
 
@@ -69,6 +74,30 @@ func (c *Client) GetTextureByID() goa.Endpoint {
 		resp, err := c.GetTextureByIDDoer.Do(req)
 		if err != nil {
 			return nil, goahttp.ErrRequestError("mktextr", "getTextureById", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// GetTextureByCoordinates returns an endpoint that makes HTTP requests to the
+// mktextr service getTextureByCoordinates server.
+func (c *Client) GetTextureByCoordinates() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeGetTextureByCoordinatesRequest(c.encoder)
+		decodeResponse = DecodeGetTextureByCoordinatesResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildGetTextureByCoordinatesRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.GetTextureByCoordinatesDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("mktextr", "getTextureByCoordinates", err)
 		}
 		return decodeResponse(resp)
 	}

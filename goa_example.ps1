@@ -1,0 +1,1 @@
+goa example mktextr/design

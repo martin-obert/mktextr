@@ -15,15 +15,17 @@ import (
 
 // Client is the "mktextr" service client.
 type Client struct {
-	GetTextureByIDEndpoint goa.Endpoint
-	CompleteTaskEndpoint   goa.Endpoint
+	GetTextureByIDEndpoint          goa.Endpoint
+	GetTextureByCoordinatesEndpoint goa.Endpoint
+	CompleteTaskEndpoint            goa.Endpoint
 }
 
 // NewClient initializes a "mktextr" service client given the endpoints.
-func NewClient(getTextureByID, completeTask goa.Endpoint) *Client {
+func NewClient(getTextureByID, getTextureByCoordinates, completeTask goa.Endpoint) *Client {
 	return &Client{
-		GetTextureByIDEndpoint: getTextureByID,
-		CompleteTaskEndpoint:   completeTask,
+		GetTextureByIDEndpoint:          getTextureByID,
+		GetTextureByCoordinatesEndpoint: getTextureByCoordinates,
+		CompleteTaskEndpoint:            completeTask,
 	}
 }
 
@@ -31,6 +33,17 @@ func NewClient(getTextureByID, completeTask goa.Endpoint) *Client {
 func (c *Client) GetTextureByID(ctx context.Context, p *GetTextureByIDPayload) (res *TextureReferencePayload, err error) {
 	var ires any
 	ires, err = c.GetTextureByIDEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.(*TextureReferencePayload), nil
+}
+
+// GetTextureByCoordinates calls the "getTextureByCoordinates" endpoint of the
+// "mktextr" service.
+func (c *Client) GetTextureByCoordinates(ctx context.Context, p *GetTextureByCoordinatesPayload) (res *TextureReferencePayload, err error) {
+	var ires any
+	ires, err = c.GetTextureByCoordinatesEndpoint(ctx, p)
 	if err != nil {
 		return
 	}

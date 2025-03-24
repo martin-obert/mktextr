@@ -25,6 +25,13 @@ type GetTextureByIDResponseBody struct {
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 }
 
+// GetTextureByCoordinatesResponseBody is the type of the "mktextr" service
+// "getTextureByCoordinates" endpoint HTTP response body.
+type GetTextureByCoordinatesResponseBody struct {
+	// Unique identifier
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+}
+
 // NewCompleteTaskRequestBody builds the HTTP request body from the payload of
 // the "completeTask" endpoint of the "mktextr" service.
 func NewCompleteTaskRequestBody(p *mktextr.TaskCompletionPayload) *CompleteTaskRequestBody {
@@ -37,6 +44,16 @@ func NewCompleteTaskRequestBody(p *mktextr.TaskCompletionPayload) *CompleteTaskR
 // NewGetTextureByIDTextureReferencePayloadOK builds a "mktextr" service
 // "getTextureById" endpoint result from a HTTP "OK" response.
 func NewGetTextureByIDTextureReferencePayloadOK(body *GetTextureByIDResponseBody) *mktextr.TextureReferencePayload {
+	v := &mktextr.TextureReferencePayload{
+		ID: body.ID,
+	}
+
+	return v
+}
+
+// NewGetTextureByCoordinatesTextureReferencePayloadOK builds a "mktextr"
+// service "getTextureByCoordinates" endpoint result from a HTTP "OK" response.
+func NewGetTextureByCoordinatesTextureReferencePayloadOK(body *GetTextureByCoordinatesResponseBody) *mktextr.TextureReferencePayload {
 	v := &mktextr.TextureReferencePayload{
 		ID: body.ID,
 	}

@@ -3,11 +3,16 @@ package data_access
 import (
 	"context"
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"mktextr/m/domain"
+	"mktextr/domain"
 )
 
 type MongoTextureRefRepository struct {
 	dbContext *MongoDbContext
+}
+
+func (m MongoTextureRefRepository) GetTextureRefByCoordinates(ctx context.Context, x int, y int, worldId string) (domain.TextureRef, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (m MongoTextureRefRepository) InsertTextureRef(ctx context.Context, uri string) (domain.TextureRef, error) {

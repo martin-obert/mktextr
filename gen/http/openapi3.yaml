@@ -20,8 +20,8 @@ paths:
                   schema:
                     type: string
                     description: Unique identifier
-                    example: Fugit nemo dolorem.
-                  example: Consequatur impedit voluptas adipisci consectetur voluptate quia.
+                    example: Atque ut nesciunt quos est.
+                  example: Ut voluptatibus est dolorem.
             requestBody:
                 required: true
                 content:
@@ -30,43 +30,77 @@ paths:
                             $ref: '#/components/schemas/TaskCompletionPayload2'
                         example:
                             texture:
-                                - 68
-                                - 105
-                                - 99
-                                - 116
-                                - 97
-                                - 32
-                                - 113
-                                - 117
-                                - 97
-                                - 101
-                                - 32
-                                - 118
-                                - 101
-                                - 108
-                                - 105
-                                - 116
-                                - 32
-                                - 118
+                                - 78
                                 - 111
-                                - 108
-                                - 117
+                                - 110
+                                - 32
+                                - 111
                                 - 112
                                 - 116
-                                - 97
-                                - 116
-                                - 101
-                                - 115
+                                - 105
+                                - 111
                                 - 32
-                                - 100
+                                - 109
                                 - 111
                                 - 108
-                                - 111
-                                - 114
+                                - 101
+                                - 115
+                                - 116
+                                - 105
+                                - 97
+                                - 101
                                 - 46
             responses:
                 "204":
                     description: No Content response.
+    /textures:
+        get:
+            tags:
+                - mktextr
+            summary: getTextureByCoordinates mktextr
+            operationId: mktextr#getTextureByCoordinates
+            parameters:
+                - name: worldId
+                  in: query
+                  description: WorldId
+                  allowEmptyValue: true
+                  required: true
+                  schema:
+                    type: string
+                    description: WorldId
+                    example: Velit et repudiandae.
+                  example: Autem velit placeat et.
+                - name: x
+                  in: query
+                  description: Texture X
+                  allowEmptyValue: true
+                  required: true
+                  schema:
+                    type: integer
+                    description: Texture X
+                    example: 5973966940440777230
+                    format: int64
+                  example: 6346180173533273027
+                - name: "y"
+                  in: query
+                  description: Texture Y
+                  allowEmptyValue: true
+                  required: true
+                  schema:
+                    type: integer
+                    description: Texture Y
+                    example: 3488679172165449929
+                    format: int64
+                  example: 5956353106596919979
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/TextureReferencePayload'
+                            example:
+                                id: Molestiae ab id quo.
     /textures/{id}:
         get:
             tags:
@@ -81,8 +115,8 @@ paths:
                   schema:
                     type: string
                     description: Texture ID
-                    example: Impedit recusandae reprehenderit et repellat qui.
-                  example: Dicta maxime.
+                    example: Saepe iure repellendus perferendis quasi et.
+                  example: Cupiditate ut et quasi sit doloremque ut.
             responses:
                 "200":
                     description: OK response.
@@ -91,7 +125,7 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/TextureReferencePayload'
                             example:
-                                id: Enim non recusandae sit a.
+                                id: Recusandae sit a id nemo suscipit qui.
 components:
     schemas:
         TaskCompletionPayload:
@@ -100,91 +134,50 @@ components:
                 taskId:
                     type: string
                     description: Unique identifier
-                    example: Corporis nihil autem.
+                    example: Temporibus voluptate vel voluptas velit.
                 texture:
                     type: string
                     description: The texture
                     example:
-                        - 86
-                        - 101
-                        - 114
+                        - 80
                         - 111
-                        - 32
-                        - 100
-                        - 101
                         - 115
-                        - 101
-                        - 114
+                        - 115
+                        - 105
+                        - 109
                         - 117
-                        - 110
-                        - 116
-                        - 32
-                        - 114
-                        - 101
-                        - 109
-                        - 32
-                        - 105
-                        - 100
-                        - 32
-                        - 109
-                        - 111
-                        - 108
-                        - 101
                         - 115
-                        - 116
+                        - 32
+                        - 112
+                        - 111
+                        - 115
+                        - 115
                         - 105
+                        - 109
+                        - 117
+                        - 115
+                        - 32
                         - 97
-                        - 101
-                        - 32
-                        - 113
                         - 117
-                        - 105
-                        - 100
-                        - 101
-                        - 109
-                        - 32
-                        - 110
-                        - 105
-                        - 104
-                        - 105
-                        - 108
+                        - 116
                         - 46
                     format: binary
             description: The texture payload
             example:
-                taskId: Qui et.
+                taskId: Impedit recusandae reprehenderit et repellat qui.
                 texture:
-                    - 80
-                    - 114
-                    - 97
-                    - 101
-                    - 115
-                    - 101
-                    - 110
-                    - 116
+                    - 68
                     - 105
-                    - 117
-                    - 109
-                    - 32
-                    - 108
-                    - 97
-                    - 98
-                    - 111
-                    - 114
-                    - 117
-                    - 109
-                    - 32
                     - 99
-                    - 111
-                    - 114
-                    - 112
-                    - 111
-                    - 114
-                    - 105
-                    - 115
-                    - 32
-                    - 101
                     - 116
+                    - 97
+                    - 32
+                    - 109
+                    - 97
+                    - 120
+                    - 105
+                    - 109
+                    - 101
                     - 46
             required:
                 - taskId
@@ -196,71 +189,93 @@ components:
                     type: string
                     description: The texture
                     example:
-                        - 84
+                        - 70
+                        - 117
+                        - 103
+                        - 105
+                        - 116
+                        - 32
+                        - 110
                         - 101
                         - 109
-                        - 112
+                        - 111
+                        - 32
+                        - 100
+                        - 111
+                        - 108
                         - 111
                         - 114
-                        - 105
-                        - 98
-                        - 117
-                        - 115
-                        - 32
-                        - 118
-                        - 111
-                        - 108
-                        - 117
-                        - 112
-                        - 116
-                        - 97
-                        - 116
                         - 101
-                        - 32
-                        - 118
-                        - 101
-                        - 108
-                        - 32
-                        - 118
-                        - 111
-                        - 108
-                        - 117
-                        - 112
-                        - 116
-                        - 97
-                        - 115
-                        - 32
-                        - 118
-                        - 101
-                        - 108
-                        - 105
-                        - 116
+                        - 109
                         - 46
                     format: binary
             description: Complete task
             example:
                 texture:
-                    - 80
+                    - 67
                     - 111
+                    - 110
                     - 115
-                    - 115
-                    - 105
-                    - 109
+                    - 101
+                    - 113
                     - 117
-                    - 115
+                    - 97
+                    - 116
+                    - 117
+                    - 114
                     - 32
-                    - 112
-                    - 111
-                    - 115
-                    - 115
                     - 105
                     - 109
+                    - 112
+                    - 101
+                    - 100
+                    - 105
+                    - 116
+                    - 32
+                    - 118
+                    - 111
+                    - 108
                     - 117
+                    - 112
+                    - 116
+                    - 97
                     - 115
                     - 32
                     - 97
-                    - 117
+                    - 100
+                    - 105
+                    - 112
+                    - 105
+                    - 115
+                    - 99
+                    - 105
+                    - 32
+                    - 99
+                    - 111
+                    - 110
+                    - 115
+                    - 101
+                    - 99
                     - 116
+                    - 101
+                    - 116
+                    - 117
+                    - 114
+                    - 32
+                    - 118
+                    - 111
+                    - 108
+                    - 117
+                    - 112
+                    - 116
+                    - 97
+                    - 116
+                    - 101
+                    - 32
+                    - 113
+                    - 117
+                    - 105
+                    - 97
                     - 46
             required:
                 - texture
@@ -270,10 +285,10 @@ components:
                 id:
                     type: string
                     description: Unique identifier
-                    example: Facere quibusdam.
+                    example: Qui et.
             description: The texture unique reference
             example:
-                id: Dolore voluptatem incidunt.
+                id: Praesentium laborum corporis et.
 tags:
     - name: mktextr
       description: Texture store

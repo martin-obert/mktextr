@@ -16,6 +16,11 @@ func GetTextureByIDMktextrPath(id string) string {
 	return fmt.Sprintf("/textures/%v", id)
 }
 
+// GetTextureByCoordinatesMktextrPath returns the URL path to the mktextr service getTextureByCoordinates HTTP endpoint.
+func GetTextureByCoordinatesMktextrPath() string {
+	return "/textures"
+}
+
 // CompleteTaskMktextrPath returns the URL path to the mktextr service completeTask HTTP endpoint.
 func CompleteTaskMktextrPath(taskID string) string {
 	return fmt.Sprintf("/tasks/%v/complete", taskID)

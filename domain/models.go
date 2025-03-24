@@ -1,34 +1,30 @@
 package domain
 
 import (
-	"encoding/json"
 	"github.com/google/uuid"
 )
 
 type Task struct {
-	Id         string
-	Parameters json.RawMessage
+}
+
+type RenderImageTask struct {
+	Task
+	WorldId string
+	X       int
+	Y       int
 }
 
 type TaskHandle struct {
-	Id uuid.UUID
+	Id string
 }
 
 func EmptyTaskHandle() TaskHandle {
 	return TaskHandle{
-		Id: uuid.New(),
+		Id: uuid.New().String(),
 	}
-}
-
-type TaskProcessor struct {
-	Id uuid.UUID
 }
 
 type TextureRef struct {
 	Id  string
 	Uri string
-}
-
-func EmptyTextureRef() TextureRef {
-	return TextureRef{}
 }

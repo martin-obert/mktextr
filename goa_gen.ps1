@@ -1,1 +1,1 @@
-goa gen mktextr/m
+goa gen mktextr/design

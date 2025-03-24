@@ -19,6 +19,24 @@ var _ = Service("mktextr", func() {
 		})
 	})
 
+	Method("getTextureByCoordinates", func() {
+		HTTP(func() {
+			GET("/textures")
+
+			// Query parameters for pagination
+			Param("worldId", String, "WorldId")
+			Param("x", Int, "Texture X")
+			Param("y", Int, "Texture Y")
+		})
+		Payload(func() {
+			Field(1, "x", Int, "Texture X")
+			Field(1, "y", Int, "Texture y")
+			Field(1, "worldId", String, "WorldId")
+			Required("x", "y", "worldId")
+		})
+		Result(TextureReferencePayload, "Texture reference")
+	})
+
 	Method("completeTask", func() {
 		Payload(TaskCompletionPayload, "Complete task")
 		Result(Empty)

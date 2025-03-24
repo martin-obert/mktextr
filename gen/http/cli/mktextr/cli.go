@@ -22,13 +22,13 @@ import (
 //
 //	command (subcommand1|subcommand2|...)
 func UsageCommands() string {
-	return `mktextr (get-texture-by-id|complete-task)
+	return `mktextr (get-texture-by-id|get-texture-by-coordinates|complete-task)
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` mktextr get-texture-by-id --id "Voluptatem magni voluptatem ab."` + "\n" +
+	return os.Args[0] + ` mktextr get-texture-by-id --id "Consequatur enim."` + "\n" +
 		""
 }
 
@@ -47,12 +47,18 @@ func ParseEndpoint(
 		mktextrGetTextureByIDFlags  = flag.NewFlagSet("get-texture-by-id", flag.ExitOnError)
 		mktextrGetTextureByIDIDFlag = mktextrGetTextureByIDFlags.String("id", "REQUIRED", "Texture ID")
 
+		mktextrGetTextureByCoordinatesFlags       = flag.NewFlagSet("get-texture-by-coordinates", flag.ExitOnError)
+		mktextrGetTextureByCoordinatesWorldIDFlag = mktextrGetTextureByCoordinatesFlags.String("world-id", "REQUIRED", "")
+		mktextrGetTextureByCoordinatesXFlag       = mktextrGetTextureByCoordinatesFlags.String("x", "REQUIRED", "")
+		mktextrGetTextureByCoordinatesYFlag       = mktextrGetTextureByCoordinatesFlags.String("y", "REQUIRED", "")
+
 		mktextrCompleteTaskFlags      = flag.NewFlagSet("complete-task", flag.ExitOnError)
 		mktextrCompleteTaskBodyFlag   = mktextrCompleteTaskFlags.String("body", "REQUIRED", "")
 		mktextrCompleteTaskTaskIDFlag = mktextrCompleteTaskFlags.String("task-id", "REQUIRED", "Unique identifier")
 	)
 	mktextrFlags.Usage = mktextrUsage
 	mktextrGetTextureByIDFlags.Usage = mktextrGetTextureByIDUsage
+	mktextrGetTextureByCoordinatesFlags.Usage = mktextrGetTextureByCoordinatesUsage
 	mktextrCompleteTaskFlags.Usage = mktextrCompleteTaskUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
@@ -92,6 +98,9 @@ func ParseEndpoint(
 			case "get-texture-by-id":
 				epf = mktextrGetTextureByIDFlags
 
+			case "get-texture-by-coordinates":
+				epf = mktextrGetTextureByCoordinatesFlags
+
 			case "complete-task":
 				epf = mktextrCompleteTaskFlags
 
@@ -123,6 +132,9 @@ func ParseEndpoint(
 			case "get-texture-by-id":
 				endpoint = c.GetTextureByID()
 				data, err = mktextrc.BuildGetTextureByIDPayload(*mktextrGetTextureByIDIDFlag)
+			case "get-texture-by-coordinates":
+				endpoint = c.GetTextureByCoordinates()
+				data, err = mktextrc.BuildGetTextureByCoordinatesPayload(*mktextrGetTextureByCoordinatesWorldIDFlag, *mktextrGetTextureByCoordinatesXFlag, *mktextrGetTextureByCoordinatesYFlag)
 			case "complete-task":
 				endpoint = c.CompleteTask()
 				data, err = mktextrc.BuildCompleteTaskPayload(*mktextrCompleteTaskBodyFlag, *mktextrCompleteTaskTaskIDFlag)
@@ -144,6 +156,7 @@ Usage:
 
 COMMAND:
     get-texture-by-id: GetTextureByID implements getTextureById.
+    get-texture-by-coordinates: GetTextureByCoordinates implements getTextureByCoordinates.
     complete-task: CompleteTask implements completeTask.
 
 Additional help:
@@ -157,7 +170,20 @@ GetTextureByID implements getTextureById.
     -id STRING: Texture ID
 
 Example:
-    %[1]s mktextr get-texture-by-id --id "Voluptatem magni voluptatem ab."
+    %[1]s mktextr get-texture-by-id --id "Consequatur enim."
+`, os.Args[0])
+}
+
+func mktextrGetTextureByCoordinatesUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] mktextr get-texture-by-coordinates -world-id STRING -x INT -y INT
+
+GetTextureByCoordinates implements getTextureByCoordinates.
+    -world-id STRING: 
+    -x INT: 
+    -y INT: 
+
+Example:
+    %[1]s mktextr get-texture-by-coordinates --world-id "Et et dicta quae velit voluptates dolor." --x 5122580919612631618 --y 2019049013654998024
 `, os.Args[0])
 }
 
@@ -170,7 +196,7 @@ CompleteTask implements completeTask.
 
 Example:
     %[1]s mktextr complete-task --body '{
-      "texture": "RGljdGEgcXVhZSB2ZWxpdCB2b2x1cHRhdGVzIGRvbG9yLg=="
-   }' --task-id "Cum sequi."
+      "texture": "Tm9uIG9wdGlvIG1vbGVzdGlhZS4="
+   }' --task-id "Est asperiores."
 `, os.Args[0])
 }

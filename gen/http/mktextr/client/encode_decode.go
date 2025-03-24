@@ -10,6 +10,7 @@ package client
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	mktextr "mktextr/gen/mktextr"
 	"net/http"
@@ -75,6 +76,75 @@ func DecodeGetTextureByIDResponse(decoder func(*http.Response) goahttp.Decoder, 
 		default:
 			body, _ := io.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("mktextr", "getTextureById", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildGetTextureByCoordinatesRequest instantiates a HTTP request object with
+// method and path set to call the "mktextr" service "getTextureByCoordinates"
+// endpoint
+func (c *Client) BuildGetTextureByCoordinatesRequest(ctx context.Context, v any) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: GetTextureByCoordinatesMktextrPath()}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("mktextr", "getTextureByCoordinates", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeGetTextureByCoordinatesRequest returns an encoder for requests sent to
+// the mktextr getTextureByCoordinates server.
+func EncodeGetTextureByCoordinatesRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*mktextr.GetTextureByCoordinatesPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("mktextr", "getTextureByCoordinates", "*mktextr.GetTextureByCoordinatesPayload", v)
+		}
+		values := req.URL.Query()
+		values.Add("worldId", p.WorldID)
+		values.Add("x", fmt.Sprintf("%v", p.X))
+		values.Add("y", fmt.Sprintf("%v", p.Y))
+		req.URL.RawQuery = values.Encode()
+		return nil
+	}
+}
+
+// DecodeGetTextureByCoordinatesResponse returns a decoder for responses
+// returned by the mktextr getTextureByCoordinates endpoint. restoreBody
+// controls whether the response body should be restored after having been read.
+func DecodeGetTextureByCoordinatesResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body GetTextureByCoordinatesResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("mktextr", "getTextureByCoordinates", err)
+			}
+			res := NewGetTextureByCoordinatesTextureReferencePayloadOK(&body)
+			return res, nil
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("mktextr", "getTextureByCoordinates", resp.StatusCode, string(body))
 		}
 	}
 }

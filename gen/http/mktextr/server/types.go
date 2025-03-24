@@ -27,10 +27,27 @@ type GetTextureByIDResponseBody struct {
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 }
 
+// GetTextureByCoordinatesResponseBody is the type of the "mktextr" service
+// "getTextureByCoordinates" endpoint HTTP response body.
+type GetTextureByCoordinatesResponseBody struct {
+	// Unique identifier
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+}
+
 // NewGetTextureByIDResponseBody builds the HTTP response body from the result
 // of the "getTextureById" endpoint of the "mktextr" service.
 func NewGetTextureByIDResponseBody(res *mktextr.TextureReferencePayload) *GetTextureByIDResponseBody {
 	body := &GetTextureByIDResponseBody{
+		ID: res.ID,
+	}
+	return body
+}
+
+// NewGetTextureByCoordinatesResponseBody builds the HTTP response body from
+// the result of the "getTextureByCoordinates" endpoint of the "mktextr"
+// service.
+func NewGetTextureByCoordinatesResponseBody(res *mktextr.TextureReferencePayload) *GetTextureByCoordinatesResponseBody {
+	body := &GetTextureByCoordinatesResponseBody{
 		ID: res.ID,
 	}
 	return body
@@ -41,6 +58,17 @@ func NewGetTextureByIDResponseBody(res *mktextr.TextureReferencePayload) *GetTex
 func NewGetTextureByIDPayload(id string) *mktextr.GetTextureByIDPayload {
 	v := &mktextr.GetTextureByIDPayload{}
 	v.ID = id
+
+	return v
+}
+
+// NewGetTextureByCoordinatesPayload builds a mktextr service
+// getTextureByCoordinates endpoint payload.
+func NewGetTextureByCoordinatesPayload(worldID string, x int, y int) *mktextr.GetTextureByCoordinatesPayload {
+	v := &mktextr.GetTextureByCoordinatesPayload{}
+	v.WorldID = worldID
+	v.X = x
+	v.Y = y
 
 	return v
 }
