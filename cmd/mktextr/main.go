@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	mktextrapi "mktextr"
-
 	mktextr "mktextr/gen/mktextr"
 	"net"
 	"net/url"

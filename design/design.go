@@ -12,7 +12,7 @@ var _ = Service("mktextr", func() {
 			Field(1, "id", String, "Texture ID")
 			Required("id")
 		})
-		Result(TextureReferencePayload, "Texture reference")
+		Result(Empty)
 
 		HTTP(func() {
 			GET("/textures/{id}")
@@ -27,6 +27,16 @@ var _ = Service("mktextr", func() {
 			Param("worldId", String, "WorldId")
 			Param("x", Int, "Texture X")
 			Param("y", Int, "Texture Y")
+
+			Response(StatusPermanentRedirect, func() {
+				Header("Location")
+				Tag("Location", "value")
+			})
+			Response(StatusAccepted, func() {
+				Header("X-mktextr-task-id")
+				Tag("X-mktextr-task-id", "value")
+			})
+			Response(StatusInternalServerError)
 		})
 		Payload(func() {
 			Field(1, "x", Int, "Texture X")
@@ -34,28 +44,29 @@ var _ = Service("mktextr", func() {
 			Field(1, "worldId", String, "WorldId")
 			Required("x", "y", "worldId")
 		})
-		Result(TextureReferencePayload, "Texture reference")
+		Result(func() {
+			Attribute("X-mktextr-task-id", String)
+			Attribute("Location", String)
+		})
 	})
 
 	Method("completeTask", func() {
-		Payload(TaskCompletionPayload, "Complete task")
+		Payload(func() {
+			Field(1, "file", Bytes, "The file to upload", func() {
+				Meta("struct:tag:encoding", "form")
+			})
+			Field(2, "filename", String, "Name of the file", func() {
+				Meta("struct:tag:encoding", "form")
+			})
+			Field(3, "taskId", String, "ID of the task")
+			Required("file", "filename", "taskId")
+		})
 		Result(Empty)
 
 		HTTP(func() {
-			GET("/tasks/{taskId}/complete")
+			PATCH("/tasks/{taskId}/complete")
+			MultipartRequest()
+			Response(StatusOK)
 		})
 	})
-})
-
-var TextureReferencePayload = Type("TextureReferencePayload", func() {
-	Description("The texture unique reference")
-
-	Attribute("id", String, "Unique identifier")
-})
-
-var TaskCompletionPayload = Type("TaskCompletionPayload", func() {
-	Description("The texture payload")
-	Attribute("taskId", String, "Unique identifier")
-	Attribute("texture", Bytes, "The texture")
-	Required("taskId", "texture")
 })

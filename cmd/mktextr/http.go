@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	mktextrapi "mktextr"
 	mktextrsvr "mktextr/gen/http/mktextr/server"
 	mktextr "mktextr/gen/mktextr"
 	"net/http"
@@ -49,7 +50,7 @@ func handleHTTPServer(ctx context.Context, u *url.URL, mktextrEndpoints *mktextr
 	)
 	{
 		eh := errorHandler(ctx)
-		mktextrServer = mktextrsvr.New(mktextrEndpoints, mux, dec, enc, eh, nil)
+		mktextrServer = mktextrsvr.New(mktextrEndpoints, mux, dec, enc, eh, nil, mktextrapi.MktextrCompleteTaskDecoderFunc)
 	}
 
 	// Configure the mux.

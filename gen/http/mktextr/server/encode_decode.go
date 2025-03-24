@@ -10,7 +10,6 @@ package server
 import (
 	"context"
 	"errors"
-	"io"
 	mktextr "mktextr/gen/mktextr"
 	"net/http"
 	"strconv"
@@ -23,11 +22,8 @@ import (
 // the mktextr getTextureById endpoint.
 func EncodeGetTextureByIDResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
-		res, _ := v.(*mktextr.TextureReferencePayload)
-		enc := encoder(ctx, w)
-		body := NewGetTextureByIDResponseBody(res)
-		w.WriteHeader(http.StatusOK)
-		return enc.Encode(body)
+		w.WriteHeader(http.StatusNoContent)
+		return nil
 	}
 }
 
@@ -51,10 +47,24 @@ func DecodeGetTextureByIDRequest(mux goahttp.Muxer, decoder func(*http.Request) 
 // returned by the mktextr getTextureByCoordinates endpoint.
 func EncodeGetTextureByCoordinatesResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
-		res, _ := v.(*mktextr.TextureReferencePayload)
+		res, _ := v.(*mktextr.GetTextureByCoordinatesResult)
+		if res.Location != nil && *res.Location == "value" {
+			enc := encoder(ctx, w)
+			body := NewGetTextureByCoordinatesPermanentRedirectResponseBody(res)
+			w.Header().Set("Location", *res.Location)
+			w.WriteHeader(http.StatusPermanentRedirect)
+			return enc.Encode(body)
+		}
+		if res.XmktextrTaskID != nil && *res.XmktextrTaskID == "value" {
+			enc := encoder(ctx, w)
+			body := NewGetTextureByCoordinatesAcceptedResponseBody(res)
+			w.Header().Set("X-Mktextr-Task-Id", *res.XmktextrTaskID)
+			w.WriteHeader(http.StatusAccepted)
+			return enc.Encode(body)
+		}
 		enc := encoder(ctx, w)
-		body := NewGetTextureByCoordinatesResponseBody(res)
-		w.WriteHeader(http.StatusOK)
+		body := NewGetTextureByCoordinatesInternalServerErrorResponseBody(res)
+		w.WriteHeader(http.StatusInternalServerError)
 		return enc.Encode(body)
 	}
 }
@@ -109,7 +119,7 @@ func DecodeGetTextureByCoordinatesRequest(mux goahttp.Muxer, decoder func(*http.
 // mktextr completeTask endpoint.
 func EncodeCompleteTaskResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
-		w.WriteHeader(http.StatusNoContent)
+		w.WriteHeader(http.StatusOK)
 		return nil
 	}
 }
@@ -118,34 +128,41 @@ func EncodeCompleteTaskResponse(encoder func(context.Context, http.ResponseWrite
 // completeTask endpoint.
 func DecodeCompleteTaskRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (any, error) {
 	return func(r *http.Request) (any, error) {
-		var (
-			body CompleteTaskRequestBody
-			err  error
-		)
-		err = decoder(r).Decode(&body)
-		if err != nil {
-			if err == io.EOF {
-				return nil, goa.MissingPayloadError()
-			}
+		var payload *mktextr.CompleteTaskPayload
+		if err := decoder(r).Decode(&payload); err != nil {
 			var gerr *goa.ServiceError
 			if errors.As(err, &gerr) {
 				return nil, gerr
 			}
 			return nil, goa.DecodePayloadError(err.Error())
 		}
-		err = ValidateCompleteTaskRequestBody(&body)
-		if err != nil {
-			return nil, err
-		}
-
-		var (
-			taskID string
-
-			params = mux.Vars(r)
-		)
-		taskID = params["taskId"]
-		payload := NewCompleteTaskTaskCompletionPayload(&body, taskID)
 
 		return payload, nil
+	}
+}
+
+// NewMktextrCompleteTaskDecoder returns a decoder to decode the multipart
+// request for the "mktextr" service "completeTask" endpoint.
+func NewMktextrCompleteTaskDecoder(mux goahttp.Muxer, mktextrCompleteTaskDecoderFn MktextrCompleteTaskDecoderFunc) func(r *http.Request) goahttp.Decoder {
+	return func(r *http.Request) goahttp.Decoder {
+		return goahttp.EncodingFunc(func(v any) error {
+			mr, merr := r.MultipartReader()
+			if merr != nil {
+				return merr
+			}
+			p := v.(**mktextr.CompleteTaskPayload)
+			if err := mktextrCompleteTaskDecoderFn(mr, p); err != nil {
+				return err
+			}
+
+			var (
+				taskID string
+
+				params = mux.Vars(r)
+			)
+			taskID = params["taskId"]
+			(*p).TaskID = taskID
+			return nil
+		})
 	}
 }

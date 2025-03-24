@@ -4,8 +4,11 @@ import "mktextr/domain"
 
 func toDomain(model TextureRefDataModel) domain.TextureRef {
 	return domain.TextureRef{
-		Id:  model.id.String(),
-		Uri: model.uri,
+		Id:      model.Id.Hex(),
+		Uri:     model.Uri,
+		WorldId: model.WorldId,
+		X:       model.X,
+		Y:       model.Y,
 	}
 }
 

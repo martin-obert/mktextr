@@ -7,7 +7,7 @@ servers:
       description: Default server for mktextr
 paths:
     /tasks/{taskId}/complete:
-        get:
+        patch:
             tags:
                 - mktextr
             summary: completeTask mktextr
@@ -15,44 +15,70 @@ paths:
             parameters:
                 - name: taskId
                   in: path
-                  description: Unique identifier
+                  description: ID of the task
                   required: true
                   schema:
                     type: string
-                    description: Unique identifier
-                    example: Atque ut nesciunt quos est.
-                  example: Ut voluptatibus est dolorem.
+                    description: ID of the task
+                    example: Dolorem similique non reprehenderit.
+                  example: Voluptate reprehenderit assumenda unde eius dicta harum.
             requestBody:
                 required: true
                 content:
-                    application/json:
+                    multipart/form-data:
                         schema:
-                            $ref: '#/components/schemas/TaskCompletionPayload2'
+                            $ref: '#/components/schemas/CompleteTaskRequestBody'
                         example:
-                            texture:
+                            file:
                                 - 78
-                                - 111
-                                - 110
-                                - 32
-                                - 111
-                                - 112
-                                - 116
                                 - 105
-                                - 111
+                                - 104
+                                - 105
+                                - 108
                                 - 32
+                                - 114
+                                - 101
+                                - 114
+                                - 117
                                 - 109
+                                - 32
+                                - 113
+                                - 117
+                                - 105
+                                - 32
+                                - 101
+                                - 116
+                                - 32
+                                - 100
                                 - 111
                                 - 108
-                                - 101
-                                - 115
-                                - 116
-                                - 105
+                                - 111
+                                - 114
+                                - 32
+                                - 112
+                                - 114
                                 - 97
                                 - 101
+                                - 115
+                                - 101
+                                - 110
+                                - 116
+                                - 105
+                                - 117
+                                - 109
+                                - 32
+                                - 108
+                                - 97
+                                - 98
+                                - 111
+                                - 114
+                                - 117
+                                - 109
                                 - 46
+                            filename: Et earum.
             responses:
-                "204":
-                    description: No Content response.
+                "200":
+                    description: OK response.
     /textures:
         get:
             tags:
@@ -68,8 +94,8 @@ paths:
                   schema:
                     type: string
                     description: WorldId
-                    example: Velit et repudiandae.
-                  example: Autem velit placeat et.
+                    example: Veniam error laudantium blanditiis vitae.
+                  example: Laborum excepturi in.
                 - name: x
                   in: query
                   description: Texture X
@@ -78,9 +104,9 @@ paths:
                   schema:
                     type: integer
                     description: Texture X
-                    example: 5973966940440777230
+                    example: 1456253771579284881
                     format: int64
-                  example: 6346180173533273027
+                  example: 4543348245675884403
                 - name: "y"
                   in: query
                   description: Texture Y
@@ -89,18 +115,47 @@ paths:
                   schema:
                     type: integer
                     description: Texture Y
-                    example: 3488679172165449929
+                    example: 7231606873395887560
                     format: int64
-                  example: 5956353106596919979
+                  example: 4373127890911828100
             responses:
-                "200":
-                    description: OK response.
+                "202":
+                    description: Accepted response.
+                    headers:
+                        X-mktextr-task-id:
+                            schema:
+                                type: string
+                                example: Voluptatem tenetur eius optio consequatur.
+                            example: Esse veniam omnis tempora sint non.
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/TextureReferencePayload'
+                                $ref: '#/components/schemas/GetTextureByCoordinatesAcceptedResponseBody'
                             example:
-                                id: Molestiae ab id quo.
+                                Location: Asperiores praesentium.
+                "308":
+                    description: Permanent Redirect response.
+                    headers:
+                        Location:
+                            schema:
+                                type: string
+                                example: Adipisci omnis.
+                            example: Corporis beatae vero qui voluptatem.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetTextureByCoordinatesPermanentRedirectResponseBody'
+                            example:
+                                X-mktextr-task-id: Deserunt sit ducimus.
+                "500":
+                    description: Internal Server Error response.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetTextureByCoordinatesInternalServerErrorResponseBody'
+                            example:
+                                Location: Nihil autem et vero deserunt.
+                                X-mktextr-task-id: Quibusdam eveniet dolore voluptatem incidunt eveniet.
     /textures/{id}:
         get:
             tags:
@@ -115,90 +170,35 @@ paths:
                   schema:
                     type: string
                     description: Texture ID
-                    example: Saepe iure repellendus perferendis quasi et.
-                  example: Cupiditate ut et quasi sit doloremque ut.
+                    example: Qui aliquid sapiente.
+                  example: Enim nihil.
             responses:
-                "200":
-                    description: OK response.
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/TextureReferencePayload'
-                            example:
-                                id: Recusandae sit a id nemo suscipit qui.
+                "204":
+                    description: No Content response.
 components:
     schemas:
-        TaskCompletionPayload:
+        CompleteTaskRequestBody:
             type: object
             properties:
-                taskId:
+                file:
                     type: string
-                    description: Unique identifier
-                    example: Temporibus voluptate vel voluptas velit.
-                texture:
-                    type: string
-                    description: The texture
+                    description: The file to upload
                     example:
-                        - 80
-                        - 111
-                        - 115
-                        - 115
-                        - 105
-                        - 109
-                        - 117
-                        - 115
-                        - 32
+                        - 79
                         - 112
+                        - 116
+                        - 105
                         - 111
-                        - 115
-                        - 115
-                        - 105
+                        - 32
                         - 109
-                        - 117
-                        - 115
-                        - 32
-                        - 97
-                        - 117
-                        - 116
-                        - 46
-                    format: binary
-            description: The texture payload
-            example:
-                taskId: Impedit recusandae reprehenderit et repellat qui.
-                texture:
-                    - 68
-                    - 105
-                    - 99
-                    - 116
-                    - 97
-                    - 32
-                    - 109
-                    - 97
-                    - 120
-                    - 105
-                    - 109
-                    - 101
-                    - 46
-            required:
-                - taskId
-                - texture
-        TaskCompletionPayload2:
-            type: object
-            properties:
-                texture:
-                    type: string
-                    description: The texture
-                    example:
-                        - 70
-                        - 117
-                        - 103
-                        - 105
-                        - 116
-                        - 32
-                        - 110
+                        - 111
+                        - 108
                         - 101
-                        - 109
-                        - 111
+                        - 115
+                        - 116
+                        - 105
+                        - 97
+                        - 101
                         - 32
                         - 100
                         - 111
@@ -207,88 +207,99 @@ components:
                         - 114
                         - 101
                         - 109
+                        - 113
+                        - 117
+                        - 101
+                        - 32
+                        - 118
+                        - 111
+                        - 108
+                        - 117
+                        - 112
+                        - 116
+                        - 97
+                        - 116
+                        - 101
+                        - 32
+                        - 113
+                        - 117
+                        - 105
+                        - 97
+                        - 32
+                        - 115
+                        - 101
+                        - 113
+                        - 117
+                        - 105
+                        - 32
+                        - 101
+                        - 97
                         - 46
                     format: binary
-            description: Complete task
+                filename:
+                    type: string
+                    description: Name of the file
+                    example: A aut assumenda ipsum culpa maiores.
             example:
-                texture:
-                    - 67
-                    - 111
-                    - 110
-                    - 115
-                    - 101
+                file:
+                    - 65
+                    - 108
+                    - 105
                     - 113
                     - 117
-                    - 97
-                    - 116
-                    - 117
-                    - 114
-                    - 32
                     - 105
+                    - 100
+                    - 32
+                    - 111
                     - 109
-                    - 112
-                    - 101
-                    - 100
-                    - 105
-                    - 116
-                    - 32
-                    - 118
-                    - 111
-                    - 108
-                    - 117
-                    - 112
-                    - 116
-                    - 97
-                    - 115
-                    - 32
-                    - 97
-                    - 100
-                    - 105
-                    - 112
-                    - 105
-                    - 115
-                    - 99
-                    - 105
-                    - 32
-                    - 99
-                    - 111
                     - 110
-                    - 115
-                    - 101
-                    - 99
-                    - 116
-                    - 101
-                    - 116
-                    - 117
-                    - 114
-                    - 32
-                    - 118
-                    - 111
-                    - 108
-                    - 117
-                    - 112
-                    - 116
-                    - 97
-                    - 116
-                    - 101
-                    - 32
-                    - 113
-                    - 117
                     - 105
+                    - 115
+                    - 32
+                    - 110
+                    - 105
+                    - 115
+                    - 105
+                    - 32
+                    - 98
+                    - 101
                     - 97
+                    - 116
+                    - 97
+                    - 101
                     - 46
+                filename: Sed dolor dolores.
             required:
-                - texture
-        TextureReferencePayload:
+                - file
+                - filename
+        GetTextureByCoordinatesAcceptedResponseBody:
             type: object
             properties:
-                id:
+                Location:
                     type: string
-                    description: Unique identifier
-                    example: Qui et.
-            description: The texture unique reference
+                    example: Numquam nesciunt.
             example:
-                id: Praesentium laborum corporis et.
+                Location: Sunt nam iusto est ratione eum ut.
+        GetTextureByCoordinatesInternalServerErrorResponseBody:
+            type: object
+            properties:
+                Location:
+                    type: string
+                    example: Et tempore quia accusamus aut eaque atque.
+                X-mktextr-task-id:
+                    type: string
+                    example: Iste quis.
+            example:
+                Location: Facere dicta consequatur dolores rerum.
+                X-mktextr-task-id: Sed est commodi dolor ut.
+        GetTextureByCoordinatesPermanentRedirectResponseBody:
+            type: object
+            properties:
+                X-mktextr-task-id:
+                    type: string
+                    example: Dolorem quae sunt sapiente omnis.
+            example:
+                X-mktextr-task-id: Voluptatibus vel.
 tags:
     - name: mktextr
       description: Texture store

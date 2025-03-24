@@ -14,48 +14,71 @@ import (
 // CompleteTaskRequestBody is the type of the "mktextr" service "completeTask"
 // endpoint HTTP request body.
 type CompleteTaskRequestBody struct {
-	// The texture
-	Texture []byte `form:"texture" json:"texture" xml:"texture"`
+	// The file to upload
+	File []byte `encoding:"form"`
+	// Name of the file
+	Filename string `encoding:"form"`
 }
 
-// GetTextureByIDResponseBody is the type of the "mktextr" service
-// "getTextureById" endpoint HTTP response body.
-type GetTextureByIDResponseBody struct {
-	// Unique identifier
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+// GetTextureByCoordinatesPermanentRedirectResponseBody is the type of the
+// "mktextr" service "getTextureByCoordinates" endpoint HTTP response body.
+type GetTextureByCoordinatesPermanentRedirectResponseBody struct {
+	XmktextrTaskID *string `form:"X-mktextr-task-id,omitempty" json:"X-mktextr-task-id,omitempty" xml:"X-mktextr-task-id,omitempty"`
 }
 
-// GetTextureByCoordinatesResponseBody is the type of the "mktextr" service
-// "getTextureByCoordinates" endpoint HTTP response body.
-type GetTextureByCoordinatesResponseBody struct {
-	// Unique identifier
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+// GetTextureByCoordinatesAcceptedResponseBody is the type of the "mktextr"
+// service "getTextureByCoordinates" endpoint HTTP response body.
+type GetTextureByCoordinatesAcceptedResponseBody struct {
+	Location *string `form:"Location,omitempty" json:"Location,omitempty" xml:"Location,omitempty"`
+}
+
+// GetTextureByCoordinatesInternalServerErrorResponseBody is the type of the
+// "mktextr" service "getTextureByCoordinates" endpoint HTTP response body.
+type GetTextureByCoordinatesInternalServerErrorResponseBody struct {
+	XmktextrTaskID *string `form:"X-mktextr-task-id,omitempty" json:"X-mktextr-task-id,omitempty" xml:"X-mktextr-task-id,omitempty"`
+	Location       *string `form:"Location,omitempty" json:"Location,omitempty" xml:"Location,omitempty"`
 }
 
 // NewCompleteTaskRequestBody builds the HTTP request body from the payload of
 // the "completeTask" endpoint of the "mktextr" service.
-func NewCompleteTaskRequestBody(p *mktextr.TaskCompletionPayload) *CompleteTaskRequestBody {
+func NewCompleteTaskRequestBody(p *mktextr.CompleteTaskPayload) *CompleteTaskRequestBody {
 	body := &CompleteTaskRequestBody{
-		Texture: p.Texture,
+		File:     p.File,
+		Filename: p.Filename,
 	}
 	return body
 }
 
-// NewGetTextureByIDTextureReferencePayloadOK builds a "mktextr" service
-// "getTextureById" endpoint result from a HTTP "OK" response.
-func NewGetTextureByIDTextureReferencePayloadOK(body *GetTextureByIDResponseBody) *mktextr.TextureReferencePayload {
-	v := &mktextr.TextureReferencePayload{
-		ID: body.ID,
+// NewGetTextureByCoordinatesResultPermanentRedirect builds a "mktextr" service
+// "getTextureByCoordinates" endpoint result from a HTTP "PermanentRedirect"
+// response.
+func NewGetTextureByCoordinatesResultPermanentRedirect(body *GetTextureByCoordinatesPermanentRedirectResponseBody, location *string) *mktextr.GetTextureByCoordinatesResult {
+	v := &mktextr.GetTextureByCoordinatesResult{
+		XmktextrTaskID: body.XmktextrTaskID,
 	}
+	v.Location = location
 
 	return v
 }
 
-// NewGetTextureByCoordinatesTextureReferencePayloadOK builds a "mktextr"
-// service "getTextureByCoordinates" endpoint result from a HTTP "OK" response.
-func NewGetTextureByCoordinatesTextureReferencePayloadOK(body *GetTextureByCoordinatesResponseBody) *mktextr.TextureReferencePayload {
-	v := &mktextr.TextureReferencePayload{
-		ID: body.ID,
+// NewGetTextureByCoordinatesResultAccepted builds a "mktextr" service
+// "getTextureByCoordinates" endpoint result from a HTTP "Accepted" response.
+func NewGetTextureByCoordinatesResultAccepted(body *GetTextureByCoordinatesAcceptedResponseBody, xmktextrTaskID *string) *mktextr.GetTextureByCoordinatesResult {
+	v := &mktextr.GetTextureByCoordinatesResult{
+		Location: body.Location,
+	}
+	v.XmktextrTaskID = xmktextrTaskID
+
+	return v
+}
+
+// NewGetTextureByCoordinatesResultInternalServerError builds a "mktextr"
+// service "getTextureByCoordinates" endpoint result from a HTTP
+// "InternalServerError" response.
+func NewGetTextureByCoordinatesResultInternalServerError(body *GetTextureByCoordinatesInternalServerErrorResponseBody) *mktextr.GetTextureByCoordinatesResult {
+	v := &mktextr.GetTextureByCoordinatesResult{
+		XmktextrTaskID: body.XmktextrTaskID,
+		Location:       body.Location,
 	}
 
 	return v

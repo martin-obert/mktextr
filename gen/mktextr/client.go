@@ -30,28 +30,24 @@ func NewClient(getTextureByID, getTextureByCoordinates, completeTask goa.Endpoin
 }
 
 // GetTextureByID calls the "getTextureById" endpoint of the "mktextr" service.
-func (c *Client) GetTextureByID(ctx context.Context, p *GetTextureByIDPayload) (res *TextureReferencePayload, err error) {
-	var ires any
-	ires, err = c.GetTextureByIDEndpoint(ctx, p)
-	if err != nil {
-		return
-	}
-	return ires.(*TextureReferencePayload), nil
+func (c *Client) GetTextureByID(ctx context.Context, p *GetTextureByIDPayload) (err error) {
+	_, err = c.GetTextureByIDEndpoint(ctx, p)
+	return
 }
 
 // GetTextureByCoordinates calls the "getTextureByCoordinates" endpoint of the
 // "mktextr" service.
-func (c *Client) GetTextureByCoordinates(ctx context.Context, p *GetTextureByCoordinatesPayload) (res *TextureReferencePayload, err error) {
+func (c *Client) GetTextureByCoordinates(ctx context.Context, p *GetTextureByCoordinatesPayload) (res *GetTextureByCoordinatesResult, err error) {
 	var ires any
 	ires, err = c.GetTextureByCoordinatesEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
-	return ires.(*TextureReferencePayload), nil
+	return ires.(*GetTextureByCoordinatesResult), nil
 }
 
 // CompleteTask calls the "completeTask" endpoint of the "mktextr" service.
-func (c *Client) CompleteTask(ctx context.Context, p *TaskCompletionPayload) (err error) {
+func (c *Client) CompleteTask(ctx context.Context, p *CompleteTaskPayload) (err error) {
 	_, err = c.CompleteTaskEndpoint(ctx, p)
 	return
 }

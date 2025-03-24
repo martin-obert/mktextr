@@ -12,6 +12,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"mime/multipart"
 	mktextr "mktextr/gen/mktextr"
 	"net/http"
 	"net/url"
@@ -62,17 +63,8 @@ func DecodeGetTextureByIDResponse(decoder func(*http.Response) goahttp.Decoder, 
 			defer resp.Body.Close()
 		}
 		switch resp.StatusCode {
-		case http.StatusOK:
-			var (
-				body GetTextureByIDResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("mktextr", "getTextureById", err)
-			}
-			res := NewGetTextureByIDTextureReferencePayloadOK(&body)
-			return res, nil
+		case http.StatusNoContent:
+			return nil, nil
 		default:
 			body, _ := io.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("mktextr", "getTextureById", resp.StatusCode, string(body))
@@ -131,16 +123,56 @@ func DecodeGetTextureByCoordinatesResponse(decoder func(*http.Response) goahttp.
 			defer resp.Body.Close()
 		}
 		switch resp.StatusCode {
-		case http.StatusOK:
+		case http.StatusPermanentRedirect:
 			var (
-				body GetTextureByCoordinatesResponseBody
+				body GetTextureByCoordinatesPermanentRedirectResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("mktextr", "getTextureByCoordinates", err)
 			}
-			res := NewGetTextureByCoordinatesTextureReferencePayloadOK(&body)
+			var (
+				location *string
+			)
+			locationRaw := resp.Header.Get("Location")
+			if locationRaw != "" {
+				location = &locationRaw
+			}
+			res := NewGetTextureByCoordinatesResultPermanentRedirect(&body, location)
+			tmp := "value"
+			res.Location = &tmp
+			return res, nil
+		case http.StatusAccepted:
+			var (
+				body GetTextureByCoordinatesAcceptedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("mktextr", "getTextureByCoordinates", err)
+			}
+			var (
+				xmktextrTaskID *string
+			)
+			xmktextrTaskIDRaw := resp.Header.Get("X-Mktextr-Task-Id")
+			if xmktextrTaskIDRaw != "" {
+				xmktextrTaskID = &xmktextrTaskIDRaw
+			}
+			res := NewGetTextureByCoordinatesResultAccepted(&body, xmktextrTaskID)
+			tmp := "value"
+			res.XmktextrTaskID = &tmp
+			return res, nil
+		case http.StatusInternalServerError:
+			var (
+				body GetTextureByCoordinatesInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("mktextr", "getTextureByCoordinates", err)
+			}
+			res := NewGetTextureByCoordinatesResultInternalServerError(&body)
 			return res, nil
 		default:
 			body, _ := io.ReadAll(resp.Body)
@@ -156,14 +188,14 @@ func (c *Client) BuildCompleteTaskRequest(ctx context.Context, v any) (*http.Req
 		taskID string
 	)
 	{
-		p, ok := v.(*mktextr.TaskCompletionPayload)
+		p, ok := v.(*mktextr.CompleteTaskPayload)
 		if !ok {
-			return nil, goahttp.ErrInvalidType("mktextr", "completeTask", "*mktextr.TaskCompletionPayload", v)
+			return nil, goahttp.ErrInvalidType("mktextr", "completeTask", "*mktextr.CompleteTaskPayload", v)
 		}
 		taskID = p.TaskID
 	}
 	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: CompleteTaskMktextrPath(taskID)}
-	req, err := http.NewRequest("GET", u.String(), nil)
+	req, err := http.NewRequest("PATCH", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("mktextr", "completeTask", u.String(), err)
 	}
@@ -178,15 +210,32 @@ func (c *Client) BuildCompleteTaskRequest(ctx context.Context, v any) (*http.Req
 // mktextr completeTask server.
 func EncodeCompleteTaskRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
 	return func(req *http.Request, v any) error {
-		p, ok := v.(*mktextr.TaskCompletionPayload)
+		p, ok := v.(*mktextr.CompleteTaskPayload)
 		if !ok {
-			return goahttp.ErrInvalidType("mktextr", "completeTask", "*mktextr.TaskCompletionPayload", v)
+			return goahttp.ErrInvalidType("mktextr", "completeTask", "*mktextr.CompleteTaskPayload", v)
 		}
-		body := NewCompleteTaskRequestBody(p)
-		if err := encoder(req).Encode(&body); err != nil {
+		if err := encoder(req).Encode(p); err != nil {
 			return goahttp.ErrEncodingError("mktextr", "completeTask", err)
 		}
 		return nil
+	}
+}
+
+// NewMktextrCompleteTaskEncoder returns an encoder to encode the multipart
+// request for the "mktextr" service "completeTask" endpoint.
+func NewMktextrCompleteTaskEncoder(encoderFn MktextrCompleteTaskEncoderFunc) func(r *http.Request) goahttp.Encoder {
+	return func(r *http.Request) goahttp.Encoder {
+		body := &bytes.Buffer{}
+		mw := multipart.NewWriter(body)
+		return goahttp.EncodingFunc(func(v any) error {
+			p := v.(*mktextr.CompleteTaskPayload)
+			if err := encoderFn(mw, p); err != nil {
+				return err
+			}
+			r.Body = io.NopCloser(body)
+			r.Header.Set("Content-Type", mw.FormDataContentType())
+			return mw.Close()
+		})
 	}
 }
 
@@ -208,7 +257,7 @@ func DecodeCompleteTaskResponse(decoder func(*http.Response) goahttp.Decoder, re
 			defer resp.Body.Close()
 		}
 		switch resp.StatusCode {
-		case http.StatusNoContent:
+		case http.StatusOK:
 			return nil, nil
 		default:
 			body, _ := io.ReadAll(resp.Body)

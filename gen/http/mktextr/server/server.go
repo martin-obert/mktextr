@@ -9,6 +9,7 @@ package server
 
 import (
 	"context"
+	"mime/multipart"
 	mktextr "mktextr/gen/mktextr"
 	"net/http"
 
@@ -35,6 +36,10 @@ type MountPoint struct {
 	Pattern string
 }
 
+// MktextrCompleteTaskDecoderFunc is the type to decode multipart request for
+// the "mktextr" service "completeTask" endpoint.
+type MktextrCompleteTaskDecoderFunc func(*multipart.Reader, **mktextr.CompleteTaskPayload) error
+
 // New instantiates HTTP handlers for all the mktextr service endpoints using
 // the provided encoder and decoder. The handlers are mounted on the given mux
 // using the HTTP verb and path defined in the design. errhandler is called
@@ -48,16 +53,17 @@ func New(
 	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
 	errhandler func(context.Context, http.ResponseWriter, error),
 	formatter func(ctx context.Context, err error) goahttp.Statuser,
+	mktextrCompleteTaskDecoderFn MktextrCompleteTaskDecoderFunc,
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
 			{"GetTextureByID", "GET", "/textures/{id}"},
 			{"GetTextureByCoordinates", "GET", "/textures"},
-			{"CompleteTask", "GET", "/tasks/{taskId}/complete"},
+			{"CompleteTask", "PATCH", "/tasks/{taskId}/complete"},
 		},
 		GetTextureByID:          NewGetTextureByIDHandler(e.GetTextureByID, mux, decoder, encoder, errhandler, formatter),
 		GetTextureByCoordinates: NewGetTextureByCoordinatesHandler(e.GetTextureByCoordinates, mux, decoder, encoder, errhandler, formatter),
-		CompleteTask:            NewCompleteTaskHandler(e.CompleteTask, mux, decoder, encoder, errhandler, formatter),
+		CompleteTask:            NewCompleteTaskHandler(e.CompleteTask, mux, NewMktextrCompleteTaskDecoder(mux, mktextrCompleteTaskDecoderFn), encoder, errhandler, formatter),
 	}
 }
 
@@ -198,7 +204,7 @@ func MountCompleteTaskHandler(mux goahttp.Muxer, h http.Handler) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("GET", "/tasks/{taskId}/complete", f)
+	mux.Handle("PATCH", "/tasks/{taskId}/complete", f)
 }
 
 // NewCompleteTaskHandler creates a HTTP handler which loads the HTTP request

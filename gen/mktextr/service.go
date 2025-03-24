@@ -14,11 +14,11 @@ import (
 // Texture store
 type Service interface {
 	// GetTextureByID implements getTextureById.
-	GetTextureByID(context.Context, *GetTextureByIDPayload) (res *TextureReferencePayload, err error)
+	GetTextureByID(context.Context, *GetTextureByIDPayload) (err error)
 	// GetTextureByCoordinates implements getTextureByCoordinates.
-	GetTextureByCoordinates(context.Context, *GetTextureByCoordinatesPayload) (res *TextureReferencePayload, err error)
+	GetTextureByCoordinates(context.Context, *GetTextureByCoordinatesPayload) (res *GetTextureByCoordinatesResult, err error)
 	// CompleteTask implements completeTask.
-	CompleteTask(context.Context, *TaskCompletionPayload) (err error)
+	CompleteTask(context.Context, *CompleteTaskPayload) (err error)
 }
 
 // APIName is the name of the API as defined in the design.
@@ -37,6 +37,17 @@ const ServiceName = "mktextr"
 // MethodKey key.
 var MethodNames = [3]string{"getTextureById", "getTextureByCoordinates", "completeTask"}
 
+// CompleteTaskPayload is the payload type of the mktextr service completeTask
+// method.
+type CompleteTaskPayload struct {
+	// The file to upload
+	File []byte `encoding:"form"`
+	// Name of the file
+	Filename string `encoding:"form"`
+	// ID of the task
+	TaskID string
+}
+
 // GetTextureByCoordinatesPayload is the payload type of the mktextr service
 // getTextureByCoordinates method.
 type GetTextureByCoordinatesPayload struct {
@@ -48,23 +59,16 @@ type GetTextureByCoordinatesPayload struct {
 	WorldID string
 }
 
+// GetTextureByCoordinatesResult is the result type of the mktextr service
+// getTextureByCoordinates method.
+type GetTextureByCoordinatesResult struct {
+	XmktextrTaskID *string
+	Location       *string
+}
+
 // GetTextureByIDPayload is the payload type of the mktextr service
 // getTextureById method.
 type GetTextureByIDPayload struct {
 	// Texture ID
 	ID string
-}
-
-// Complete task
-type TaskCompletionPayload struct {
-	// Unique identifier
-	TaskID string
-	// The texture
-	Texture []byte
-}
-
-// Texture reference
-type TextureReferencePayload struct {
-	// Unique identifier
-	ID *string
 }

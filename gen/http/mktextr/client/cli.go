@@ -65,16 +65,16 @@ func BuildGetTextureByCoordinatesPayload(mktextrGetTextureByCoordinatesWorldID s
 
 // BuildCompleteTaskPayload builds the payload for the mktextr completeTask
 // endpoint from CLI flags.
-func BuildCompleteTaskPayload(mktextrCompleteTaskBody string, mktextrCompleteTaskTaskID string) (*mktextr.TaskCompletionPayload, error) {
+func BuildCompleteTaskPayload(mktextrCompleteTaskBody string, mktextrCompleteTaskTaskID string) (*mktextr.CompleteTaskPayload, error) {
 	var err error
 	var body CompleteTaskRequestBody
 	{
 		err = json.Unmarshal([]byte(mktextrCompleteTaskBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"texture\": \"Tm9uIG9wdGlvIG1vbGVzdGlhZS4=\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"file\": \"TmloaWwgcmVydW0gcXVpIGV0IGRvbG9yIHByYWVzZW50aXVtIGxhYm9ydW0u\",\n      \"filename\": \"Et earum.\"\n   }'")
 		}
-		if body.Texture == nil {
-			err = goa.MergeErrors(err, goa.MissingFieldError("texture", "body"))
+		if body.File == nil {
+			err = goa.MergeErrors(err, goa.MissingFieldError("file", "body"))
 		}
 		if err != nil {
 			return nil, err
@@ -84,8 +84,9 @@ func BuildCompleteTaskPayload(mktextrCompleteTaskBody string, mktextrCompleteTas
 	{
 		taskID = mktextrCompleteTaskTaskID
 	}
-	v := &mktextr.TaskCompletionPayload{
-		Texture: body.Texture,
+	v := &mktextr.CompleteTaskPayload{
+		File:     body.File,
+		Filename: body.Filename,
 	}
 	v.TaskID = taskID
 

@@ -16,39 +16,58 @@ import (
 // CompleteTaskRequestBody is the type of the "mktextr" service "completeTask"
 // endpoint HTTP request body.
 type CompleteTaskRequestBody struct {
-	// The texture
-	Texture []byte `form:"texture,omitempty" json:"texture,omitempty" xml:"texture,omitempty"`
+	// The file to upload
+	File []byte `encoding:"form"`
+	// Name of the file
+	Filename *string `encoding:"form"`
 }
 
-// GetTextureByIDResponseBody is the type of the "mktextr" service
-// "getTextureById" endpoint HTTP response body.
-type GetTextureByIDResponseBody struct {
-	// Unique identifier
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+// GetTextureByCoordinatesPermanentRedirectResponseBody is the type of the
+// "mktextr" service "getTextureByCoordinates" endpoint HTTP response body.
+type GetTextureByCoordinatesPermanentRedirectResponseBody struct {
+	XmktextrTaskID *string `form:"X-mktextr-task-id,omitempty" json:"X-mktextr-task-id,omitempty" xml:"X-mktextr-task-id,omitempty"`
 }
 
-// GetTextureByCoordinatesResponseBody is the type of the "mktextr" service
-// "getTextureByCoordinates" endpoint HTTP response body.
-type GetTextureByCoordinatesResponseBody struct {
-	// Unique identifier
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+// GetTextureByCoordinatesAcceptedResponseBody is the type of the "mktextr"
+// service "getTextureByCoordinates" endpoint HTTP response body.
+type GetTextureByCoordinatesAcceptedResponseBody struct {
+	Location *string `form:"Location,omitempty" json:"Location,omitempty" xml:"Location,omitempty"`
 }
 
-// NewGetTextureByIDResponseBody builds the HTTP response body from the result
-// of the "getTextureById" endpoint of the "mktextr" service.
-func NewGetTextureByIDResponseBody(res *mktextr.TextureReferencePayload) *GetTextureByIDResponseBody {
-	body := &GetTextureByIDResponseBody{
-		ID: res.ID,
+// GetTextureByCoordinatesInternalServerErrorResponseBody is the type of the
+// "mktextr" service "getTextureByCoordinates" endpoint HTTP response body.
+type GetTextureByCoordinatesInternalServerErrorResponseBody struct {
+	XmktextrTaskID *string `form:"X-mktextr-task-id,omitempty" json:"X-mktextr-task-id,omitempty" xml:"X-mktextr-task-id,omitempty"`
+	Location       *string `form:"Location,omitempty" json:"Location,omitempty" xml:"Location,omitempty"`
+}
+
+// NewGetTextureByCoordinatesPermanentRedirectResponseBody builds the HTTP
+// response body from the result of the "getTextureByCoordinates" endpoint of
+// the "mktextr" service.
+func NewGetTextureByCoordinatesPermanentRedirectResponseBody(res *mktextr.GetTextureByCoordinatesResult) *GetTextureByCoordinatesPermanentRedirectResponseBody {
+	body := &GetTextureByCoordinatesPermanentRedirectResponseBody{
+		XmktextrTaskID: res.XmktextrTaskID,
 	}
 	return body
 }
 
-// NewGetTextureByCoordinatesResponseBody builds the HTTP response body from
-// the result of the "getTextureByCoordinates" endpoint of the "mktextr"
+// NewGetTextureByCoordinatesAcceptedResponseBody builds the HTTP response body
+// from the result of the "getTextureByCoordinates" endpoint of the "mktextr"
 // service.
-func NewGetTextureByCoordinatesResponseBody(res *mktextr.TextureReferencePayload) *GetTextureByCoordinatesResponseBody {
-	body := &GetTextureByCoordinatesResponseBody{
-		ID: res.ID,
+func NewGetTextureByCoordinatesAcceptedResponseBody(res *mktextr.GetTextureByCoordinatesResult) *GetTextureByCoordinatesAcceptedResponseBody {
+	body := &GetTextureByCoordinatesAcceptedResponseBody{
+		Location: res.Location,
+	}
+	return body
+}
+
+// NewGetTextureByCoordinatesInternalServerErrorResponseBody builds the HTTP
+// response body from the result of the "getTextureByCoordinates" endpoint of
+// the "mktextr" service.
+func NewGetTextureByCoordinatesInternalServerErrorResponseBody(res *mktextr.GetTextureByCoordinatesResult) *GetTextureByCoordinatesInternalServerErrorResponseBody {
+	body := &GetTextureByCoordinatesInternalServerErrorResponseBody{
+		XmktextrTaskID: res.XmktextrTaskID,
+		Location:       res.Location,
 	}
 	return body
 }
@@ -73,11 +92,12 @@ func NewGetTextureByCoordinatesPayload(worldID string, x int, y int) *mktextr.Ge
 	return v
 }
 
-// NewCompleteTaskTaskCompletionPayload builds a mktextr service completeTask
-// endpoint payload.
-func NewCompleteTaskTaskCompletionPayload(body *CompleteTaskRequestBody, taskID string) *mktextr.TaskCompletionPayload {
-	v := &mktextr.TaskCompletionPayload{
-		Texture: body.Texture,
+// NewCompleteTaskPayload builds a mktextr service completeTask endpoint
+// payload.
+func NewCompleteTaskPayload(body *CompleteTaskRequestBody, taskID string) *mktextr.CompleteTaskPayload {
+	v := &mktextr.CompleteTaskPayload{
+		File:     body.File,
+		Filename: *body.Filename,
 	}
 	v.TaskID = taskID
 
@@ -87,8 +107,11 @@ func NewCompleteTaskTaskCompletionPayload(body *CompleteTaskRequestBody, taskID 
 // ValidateCompleteTaskRequestBody runs the validations defined on
 // CompleteTaskRequestBody
 func ValidateCompleteTaskRequestBody(body *CompleteTaskRequestBody) (err error) {
-	if body.Texture == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("texture", "body"))
+	if body.File == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("file", "body"))
+	}
+	if body.Filename == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("filename", "body"))
 	}
 	return
 }

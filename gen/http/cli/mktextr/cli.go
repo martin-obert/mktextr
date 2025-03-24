@@ -28,7 +28,7 @@ func UsageCommands() string {
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` mktextr get-texture-by-id --id "Consequatur enim."` + "\n" +
+	return os.Args[0] + ` mktextr get-texture-by-id --id "Et et dicta quae velit voluptates dolor."` + "\n" +
 		""
 }
 
@@ -40,6 +40,7 @@ func ParseEndpoint(
 	enc func(*http.Request) goahttp.Encoder,
 	dec func(*http.Response) goahttp.Decoder,
 	restore bool,
+	mktextrCompleteTaskEncoderFn mktextrc.MktextrCompleteTaskEncoderFunc,
 ) (goa.Endpoint, any, error) {
 	var (
 		mktextrFlags = flag.NewFlagSet("mktextr", flag.ContinueOnError)
@@ -54,7 +55,7 @@ func ParseEndpoint(
 
 		mktextrCompleteTaskFlags      = flag.NewFlagSet("complete-task", flag.ExitOnError)
 		mktextrCompleteTaskBodyFlag   = mktextrCompleteTaskFlags.String("body", "REQUIRED", "")
-		mktextrCompleteTaskTaskIDFlag = mktextrCompleteTaskFlags.String("task-id", "REQUIRED", "Unique identifier")
+		mktextrCompleteTaskTaskIDFlag = mktextrCompleteTaskFlags.String("task-id", "REQUIRED", "ID of the task")
 	)
 	mktextrFlags.Usage = mktextrUsage
 	mktextrGetTextureByIDFlags.Usage = mktextrGetTextureByIDUsage
@@ -136,7 +137,7 @@ func ParseEndpoint(
 				endpoint = c.GetTextureByCoordinates()
 				data, err = mktextrc.BuildGetTextureByCoordinatesPayload(*mktextrGetTextureByCoordinatesWorldIDFlag, *mktextrGetTextureByCoordinatesXFlag, *mktextrGetTextureByCoordinatesYFlag)
 			case "complete-task":
-				endpoint = c.CompleteTask()
+				endpoint = c.CompleteTask(mktextrCompleteTaskEncoderFn)
 				data, err = mktextrc.BuildCompleteTaskPayload(*mktextrCompleteTaskBodyFlag, *mktextrCompleteTaskTaskIDFlag)
 			}
 		}
@@ -170,7 +171,7 @@ GetTextureByID implements getTextureById.
     -id STRING: Texture ID
 
 Example:
-    %[1]s mktextr get-texture-by-id --id "Consequatur enim."
+    %[1]s mktextr get-texture-by-id --id "Et et dicta quae velit voluptates dolor."
 `, os.Args[0])
 }
 
@@ -183,7 +184,7 @@ GetTextureByCoordinates implements getTextureByCoordinates.
     -y INT: 
 
 Example:
-    %[1]s mktextr get-texture-by-coordinates --world-id "Et et dicta quae velit voluptates dolor." --x 5122580919612631618 --y 2019049013654998024
+    %[1]s mktextr get-texture-by-coordinates --world-id "Cum sequi." --x 2890731354217571008 --y 4926212361102318830
 `, os.Args[0])
 }
 
@@ -192,11 +193,12 @@ func mktextrCompleteTaskUsage() {
 
 CompleteTask implements completeTask.
     -body JSON: 
-    -task-id STRING: Unique identifier
+    -task-id STRING: ID of the task
 
 Example:
     %[1]s mktextr complete-task --body '{
-      "texture": "Tm9uIG9wdGlvIG1vbGVzdGlhZS4="
-   }' --task-id "Est asperiores."
+      "file": "TmloaWwgcmVydW0gcXVpIGV0IGRvbG9yIHByYWVzZW50aXVtIGxhYm9ydW0u",
+      "filename": "Et earum."
+   }' --task-id "Voluptate vel voluptas."
 `, os.Args[0])
 }

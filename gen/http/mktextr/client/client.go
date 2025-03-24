@@ -9,6 +9,8 @@ package client
 
 import (
 	"context"
+	"mime/multipart"
+	mktextr "mktextr/gen/mktextr"
 	"net/http"
 
 	goahttp "goa.design/goa/v3/http"
@@ -38,6 +40,10 @@ type Client struct {
 	encoder func(*http.Request) goahttp.Encoder
 	decoder func(*http.Response) goahttp.Decoder
 }
+
+// MktextrCompleteTaskEncoderFunc is the type to encode multipart request for
+// the "mktextr" service "completeTask" endpoint.
+type MktextrCompleteTaskEncoderFunc func(*multipart.Writer, *mktextr.CompleteTaskPayload) error
 
 // NewClient instantiates HTTP clients for all the mktextr service servers.
 func NewClient(
@@ -105,9 +111,9 @@ func (c *Client) GetTextureByCoordinates() goa.Endpoint {
 
 // CompleteTask returns an endpoint that makes HTTP requests to the mktextr
 // service completeTask server.
-func (c *Client) CompleteTask() goa.Endpoint {
+func (c *Client) CompleteTask(mktextrCompleteTaskEncoderFn MktextrCompleteTaskEncoderFunc) goa.Endpoint {
 	var (
-		encodeRequest  = EncodeCompleteTaskRequest(c.encoder)
+		encodeRequest  = EncodeCompleteTaskRequest(NewMktextrCompleteTaskEncoder(mktextrCompleteTaskEncoderFn))
 		decodeResponse = DecodeCompleteTaskResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {

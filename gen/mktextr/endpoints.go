@@ -41,7 +41,7 @@ func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 func NewGetTextureByIDEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*GetTextureByIDPayload)
-		return s.GetTextureByID(ctx, p)
+		return nil, s.GetTextureByID(ctx, p)
 	}
 }
 
@@ -58,7 +58,7 @@ func NewGetTextureByCoordinatesEndpoint(s Service) goa.Endpoint {
 // "completeTask" of service "mktextr".
 func NewCompleteTaskEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
-		p := req.(*TaskCompletionPayload)
+		p := req.(*CompleteTaskPayload)
 		return nil, s.CompleteTask(ctx, p)
 	}
 }

@@ -13,27 +13,30 @@ produces:
     - application/gob
 paths:
     /tasks/{taskId}/complete:
-        get:
+        patch:
             tags:
                 - mktextr
             summary: completeTask mktextr
             operationId: mktextr#completeTask
+            consumes:
+                - multipart/form-data
             parameters:
                 - name: taskId
                   in: path
-                  description: Unique identifier
+                  description: ID of the task
                   required: true
                   type: string
                 - name: CompleteTaskRequestBody
-                  in: body
+                  in: formData
                   required: true
                   schema:
-                    $ref: '#/definitions/TaskCompletionPayload'
+                    $ref: '#/definitions/MktextrCompleteTaskRequestBody'
                     required:
-                        - texture
+                        - file
+                        - filename
             responses:
-                "204":
-                    description: No Content response.
+                "200":
+                    description: OK response.
             schemes:
                 - http
     /textures:
@@ -59,10 +62,24 @@ paths:
                   required: true
                   type: integer
             responses:
-                "200":
-                    description: OK response.
+                "202":
+                    description: Accepted response.
                     schema:
-                        $ref: '#/definitions/TextureReferencePayload'
+                        $ref: '#/definitions/MktextrGetTextureByCoordinatesAcceptedResponseBody'
+                    headers:
+                        X-mktextr-task-id:
+                            type: string
+                "308":
+                    description: Permanent Redirect response.
+                    schema:
+                        $ref: '#/definitions/MktextrGetTextureByCoordinatesPermanentRedirectResponseBody'
+                    headers:
+                        Location:
+                            type: string
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/MktextrGetTextureByCoordinatesInternalServerErrorResponseBody'
             schemes:
                 - http
     /textures/{id}:
@@ -78,100 +95,87 @@ paths:
                   required: true
                   type: string
             responses:
-                "200":
-                    description: OK response.
-                    schema:
-                        $ref: '#/definitions/TextureReferencePayload'
+                "204":
+                    description: No Content response.
             schemes:
                 - http
 definitions:
-    TaskCompletionPayload:
-        title: TaskCompletionPayload
+    MktextrCompleteTaskRequestBody:
+        title: MktextrCompleteTaskRequestBody
         type: object
         properties:
-            texture:
+            file:
                 type: string
-                description: The texture
+                description: The file to upload
                 example:
-                    - 67
-                    - 111
-                    - 114
-                    - 112
-                    - 111
-                    - 114
-                    - 105
-                    - 115
-                    - 32
-                    - 110
-                    - 105
-                    - 104
-                    - 105
-                    - 108
-                    - 32
-                    - 97
-                    - 117
-                    - 116
+                    - 86
                     - 101
-                    - 109
+                    - 108
+                    - 105
+                    - 116
+                    - 32
+                    - 112
+                    - 108
+                    - 97
+                    - 99
+                    - 101
+                    - 97
+                    - 116
                     - 46
                 format: byte
-        description: Complete task
+            filename:
+                type: string
+                description: Name of the file
+                example: Voluptate dolorem quia.
         example:
-            texture:
-                - 86
-                - 101
-                - 114
-                - 111
-                - 32
-                - 100
-                - 101
-                - 115
-                - 101
-                - 114
-                - 117
-                - 110
-                - 116
-                - 32
-                - 114
-                - 101
-                - 109
-                - 32
-                - 105
-                - 100
-                - 32
-                - 109
-                - 111
-                - 108
-                - 101
-                - 115
-                - 116
-                - 105
+            file:
+                - 83
                 - 97
                 - 101
+                - 112
+                - 101
                 - 32
+                - 97
+                - 116
                 - 113
                 - 117
-                - 105
-                - 100
                 - 101
-                - 109
                 - 32
-                - 110
-                - 105
-                - 104
-                - 105
-                - 108
+                - 117
+                - 116
                 - 46
+            filename: Quos est ad ut voluptatibus.
         required:
-            - texture
-    TextureReferencePayload:
-        title: TextureReferencePayload
+            - file
+            - filename
+    MktextrGetTextureByCoordinatesAcceptedResponseBody:
+        title: MktextrGetTextureByCoordinatesAcceptedResponseBody
         type: object
         properties:
-            id:
+            Location:
                 type: string
-                description: Unique identifier
-                example: Facere quibusdam.
-        description: Texture reference
+                example: Odio fugit nemo dolorem voluptas consequatur impedit.
         example:
-            id: Dolore voluptatem incidunt.
+            Location: Adipisci consectetur voluptate quia sunt saepe.
+    MktextrGetTextureByCoordinatesInternalServerErrorResponseBody:
+        title: MktextrGetTextureByCoordinatesInternalServerErrorResponseBody
+        type: object
+        properties:
+            Location:
+                type: string
+                example: Et non cupiditate ut et quasi sit.
+            X-mktextr-task-id:
+                type: string
+                example: Repellendus perferendis.
+        example:
+            Location: Repudiandae animi.
+            X-mktextr-task-id: Ut rerum velit.
+    MktextrGetTextureByCoordinatesPermanentRedirectResponseBody:
+        title: MktextrGetTextureByCoordinatesPermanentRedirectResponseBody
+        type: object
+        properties:
+            X-mktextr-task-id:
+                type: string
+                example: Eveniet possimus possimus aut quia.
+        example:
+            X-mktextr-task-id: Recusandae reprehenderit et repellat qui et dicta.

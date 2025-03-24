@@ -31,6 +31,10 @@ func NewMongoDbContext(connectionUri string) (*MongoDbContext, error) {
 }
 
 type TextureRefDataModel struct {
-	id  bson.ObjectID
-	uri string
+	Id      bson.ObjectID `bson:"_id,omitempty"`
+	Uri     string        `bson:"uri"`
+	FileId  string        `bson:"file_id"`
+	WorldId string        `bson:"world_id"`
+	X       int           `bson:"x"`
+	Y       int           `bson:"y"`
 }
