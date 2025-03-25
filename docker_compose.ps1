@@ -1,0 +1,1 @@
+docker compose --profile all up --no-deps --build --force-recreate

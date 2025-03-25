@@ -72,8 +72,14 @@ func (m MongoTextureRefRepository) InsertTextureSet(ctx context.Context, model d
 
 func (m MongoTextureRefRepository) UpdateTextureSet(ctx context.Context, model domain.TextureSet) error {
 	data := NewTextureSetDataModel(model)
-	filter := bson.M{"_id": model.Id}
-	_, err := m.dbContext.textureRefsCollection.ReplaceOne(ctx, filter, data)
+	filter := bson.M{"_id": data.Id}
+	c, err := m.dbContext.textureRefsCollection.ReplaceOne(ctx, filter, data)
+	if err != nil {
+		return err
+	}
+	if c.MatchedCount == 0 {
+		return fmt.Errorf("texture set not updated")
+	}
 	return err
 }
 
@@ -174,14 +180,20 @@ func NewRedisTaskRepository(client *redis.Client) domain.ITaskRepository {
 
 type LocalTextureStorage struct {
 	rootFolder string
+	uriPrefix  string
 }
 
 func (t LocalTextureStorage) DeleteTextureById(textureId string) error {
-	var path = t.getFilePath(textureId)
+	var path = t.getFileAbsPath(textureId)
 	return os.Remove(path)
 }
 
-func (t LocalTextureStorage) getFilePath(textureId string) string {
+func (t LocalTextureStorage) getFileUri(textureId string) string {
+	return fmt.Sprintf("%s%s", t.uriPrefix, textureId)
+
+}
+
+func (t LocalTextureStorage) getFileAbsPath(textureId string) string {
 	p, err := filepath.Abs(t.rootFolder)
 	if err != nil {
 		panic(err)
@@ -191,11 +203,11 @@ func (t LocalTextureStorage) getFilePath(textureId string) string {
 		panic(err)
 	}
 
-	return filepath.Join(p, fmt.Sprintf("%s.png", textureId))
+	return filepath.Join(p, textureId)
 }
 
 func (t LocalTextureStorage) GetTextureById(textureId string) ([]byte, error) {
-	var path = t.getFilePath(textureId)
+	var path = t.getFileAbsPath(textureId)
 
 	// Read binary data from file
 	file, err := os.Open(path)
@@ -219,11 +231,12 @@ func (t LocalTextureStorage) GetTextureById(textureId string) ([]byte, error) {
 	return data, nil
 }
 
-func (t LocalTextureStorage) StoreTexture(rawData []byte) (domain.TextureRef, error) {
-	fileId := uuid.New().String()
+func (t LocalTextureStorage) StoreTexture(rawData []byte, extension string) (domain.TextureRef, error) {
+	fileId := fmt.Sprintf("%s%s", uuid.New().String(), extension)
 	// Create (or overwrite) the file
-	var path = t.getFilePath(fileId)
-	file, err := os.Create(path)
+	var absPath = t.getFileAbsPath(fileId)
+	var uri = t.getFileUri(fileId)
+	file, err := os.Create(absPath)
 	if err != nil {
 		fmt.Println("Error creating file:", err)
 		return domain.TextureRef{}, err
@@ -244,13 +257,13 @@ func (t LocalTextureStorage) StoreTexture(rawData []byte) (domain.TextureRef, er
 	}
 
 	return domain.TextureRef{
-		Uri:    path,
+		Uri:    uri,
 		FileId: fileId,
 	}, nil
 }
 
-func NewLocalTextureStorage(rootFolder string) domain.ITextureStorage {
-	return &LocalTextureStorage{rootFolder: rootFolder}
+func NewLocalTextureStorage(rootFolder string, uriPrefix string) domain.ITextureStorage {
+	return &LocalTextureStorage{rootFolder: rootFolder, uriPrefix: uriPrefix}
 }
 
 type RedisTextureSetCache struct {
