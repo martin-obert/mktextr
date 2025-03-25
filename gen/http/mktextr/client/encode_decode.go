@@ -14,30 +14,19 @@ import (
 	"io"
 	"mime/multipart"
 	mktextr "mktextr/gen/mktextr"
-	mktextrviews "mktextr/gen/mktextr/views"
 	"net/http"
 	"net/url"
 
 	goahttp "goa.design/goa/v3/http"
 )
 
-// BuildGetTextureByIDRequest instantiates a HTTP request object with method
-// and path set to call the "mktextr" service "getTextureById" endpoint
-func (c *Client) BuildGetTextureByIDRequest(ctx context.Context, v any) (*http.Request, error) {
-	var (
-		id string
-	)
-	{
-		p, ok := v.(*mktextr.GetTextureByIDPayload)
-		if !ok {
-			return nil, goahttp.ErrInvalidType("mktextr", "getTextureById", "*mktextr.GetTextureByIDPayload", v)
-		}
-		id = p.ID
-	}
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: GetTextureByIDMktextrPath(id)}
+// BuildGetTaskQueueRequest instantiates a HTTP request object with method and
+// path set to call the "mktextr" service "GetTaskQueue" endpoint
+func (c *Client) BuildGetTaskQueueRequest(ctx context.Context, v any) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: GetTaskQueueMktextrPath()}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
-		return nil, goahttp.ErrInvalidURL("mktextr", "getTextureById", u.String(), err)
+		return nil, goahttp.ErrInvalidURL("mktextr", "GetTaskQueue", u.String(), err)
 	}
 	if ctx != nil {
 		req = req.WithContext(ctx)
@@ -46,10 +35,10 @@ func (c *Client) BuildGetTextureByIDRequest(ctx context.Context, v any) (*http.R
 	return req, nil
 }
 
-// DecodeGetTextureByIDResponse returns a decoder for responses returned by the
-// mktextr getTextureById endpoint. restoreBody controls whether the response
+// DecodeGetTaskQueueResponse returns a decoder for responses returned by the
+// mktextr GetTaskQueue endpoint. restoreBody controls whether the response
 // body should be restored after having been read.
-func DecodeGetTextureByIDResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+func DecodeGetTaskQueueResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
@@ -64,11 +53,20 @@ func DecodeGetTextureByIDResponse(decoder func(*http.Response) goahttp.Decoder, 
 			defer resp.Body.Close()
 		}
 		switch resp.StatusCode {
-		case http.StatusNoContent:
-			return nil, nil
+		case http.StatusOK:
+			var (
+				body GetTaskQueueResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("mktextr", "GetTaskQueue", err)
+			}
+			res := NewGetTaskQueueResultOK(&body)
+			return res, nil
 		default:
 			body, _ := io.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("mktextr", "getTextureById", resp.StatusCode, string(body))
+			return nil, goahttp.ErrInvalidResponse("mktextr", "GetTaskQueue", resp.StatusCode, string(body))
 		}
 	}
 }
@@ -133,34 +131,22 @@ func DecodeGetTextureByCoordinatesResponse(decoder func(*http.Response) goahttp.
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("mktextr", "getTextureByCoordinates", err)
 			}
-			p := NewGetTextureByCoordinatesGetResultOK(&body)
-			tmp := "ok"
-			p.StatusCode = &tmp
-			view := "default"
-			vres := &mktextrviews.GetResult{Projected: p, View: view}
-			if err = mktextrviews.ValidateGetResult(vres); err != nil {
-				return nil, goahttp.ErrValidationError("mktextr", "getTextureByCoordinates", err)
-			}
-			res := mktextr.NewGetResult(vres)
+			res := NewGetTextureByCoordinatesResponseOK(&body)
+			tmp := "ready"
+			res.TextureSetState = &tmp
 			return res, nil
-		case http.StatusAccepted:
+		case http.StatusPartialContent:
 			var (
-				body GetTextureByCoordinatesAcceptedResponseBody
+				body GetTextureByCoordinatesPartialContentResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("mktextr", "getTextureByCoordinates", err)
 			}
-			p := NewGetTextureByCoordinatesGetResultAccepted(&body)
-			tmp := "accepted"
-			p.StatusCode = &tmp
-			view := "default"
-			vres := &mktextrviews.GetResult{Projected: p, View: view}
-			if err = mktextrviews.ValidateGetResult(vres); err != nil {
-				return nil, goahttp.ErrValidationError("mktextr", "getTextureByCoordinates", err)
-			}
-			res := mktextr.NewGetResult(vres)
+			res := NewGetTextureByCoordinatesResponsePartialContent(&body)
+			tmp := "processing"
+			res.TextureSetState = &tmp
 			return res, nil
 		case http.StatusBadRequest:
 			var (
@@ -171,13 +157,7 @@ func DecodeGetTextureByCoordinatesResponse(decoder func(*http.Response) goahttp.
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("mktextr", "getTextureByCoordinates", err)
 			}
-			p := NewGetTextureByCoordinatesGetResultBadRequest(&body)
-			view := "default"
-			vres := &mktextrviews.GetResult{Projected: p, View: view}
-			if err = mktextrviews.ValidateGetResult(vres); err != nil {
-				return nil, goahttp.ErrValidationError("mktextr", "getTextureByCoordinates", err)
-			}
-			res := mktextr.NewGetResult(vres)
+			res := NewGetTextureByCoordinatesResponseBadRequest(&body)
 			return res, nil
 		default:
 			body, _ := io.ReadAll(resp.Body)

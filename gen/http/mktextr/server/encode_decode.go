@@ -11,7 +11,6 @@ import (
 	"context"
 	"errors"
 	mktextr "mktextr/gen/mktextr"
-	mktextrviews "mktextr/gen/mktextr/views"
 	"net/http"
 	"strconv"
 
@@ -19,28 +18,15 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// EncodeGetTextureByIDResponse returns an encoder for responses returned by
-// the mktextr getTextureById endpoint.
-func EncodeGetTextureByIDResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
+// EncodeGetTaskQueueResponse returns an encoder for responses returned by the
+// mktextr GetTaskQueue endpoint.
+func EncodeGetTaskQueueResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
-		w.WriteHeader(http.StatusNoContent)
-		return nil
-	}
-}
-
-// DecodeGetTextureByIDRequest returns a decoder for requests sent to the
-// mktextr getTextureById endpoint.
-func DecodeGetTextureByIDRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (any, error) {
-	return func(r *http.Request) (any, error) {
-		var (
-			id string
-
-			params = mux.Vars(r)
-		)
-		id = params["id"]
-		payload := NewGetTextureByIDPayload(id)
-
-		return payload, nil
+		res, _ := v.(*mktextr.GetTaskQueueResult)
+		enc := encoder(ctx, w)
+		body := NewGetTaskQueueResponseBody(res)
+		w.WriteHeader(http.StatusOK)
+		return enc.Encode(body)
 	}
 }
 
@@ -48,21 +34,21 @@ func DecodeGetTextureByIDRequest(mux goahttp.Muxer, decoder func(*http.Request) 
 // returned by the mktextr getTextureByCoordinates endpoint.
 func EncodeGetTextureByCoordinatesResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
-		res := v.(*mktextrviews.GetResult)
-		if res.Projected.StatusCode != nil && *res.Projected.StatusCode == "ok" {
+		res, _ := v.(*mktextr.GetTextureByCoordinatesResponse)
+		if res.TextureSetState != nil && *res.TextureSetState == "ready" {
 			enc := encoder(ctx, w)
-			body := NewGetTextureByCoordinatesOKResponseBody(res.Projected)
+			body := NewGetTextureByCoordinatesOKResponseBody(res)
 			w.WriteHeader(http.StatusOK)
 			return enc.Encode(body)
 		}
-		if res.Projected.StatusCode != nil && *res.Projected.StatusCode == "accepted" {
+		if res.TextureSetState != nil && *res.TextureSetState == "processing" {
 			enc := encoder(ctx, w)
-			body := NewGetTextureByCoordinatesAcceptedResponseBody(res.Projected)
-			w.WriteHeader(http.StatusAccepted)
+			body := NewGetTextureByCoordinatesPartialContentResponseBody(res)
+			w.WriteHeader(http.StatusPartialContent)
 			return enc.Encode(body)
 		}
 		enc := encoder(ctx, w)
-		body := NewGetTextureByCoordinatesBadRequestResponseBody(res.Projected)
+		body := NewGetTextureByCoordinatesBadRequestResponseBody(res)
 		w.WriteHeader(http.StatusBadRequest)
 		return enc.Encode(body)
 	}

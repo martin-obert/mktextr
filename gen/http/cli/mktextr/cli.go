@@ -22,13 +22,13 @@ import (
 //
 //	command (subcommand1|subcommand2|...)
 func UsageCommands() string {
-	return `mktextr (get-texture-by-id|get-texture-by-coordinates|complete-task)
+	return `mktextr (get-task-queue|get-texture-by-coordinates|complete-task)
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` mktextr get-texture-by-id --id "Ab id quo."` + "\n" +
+	return os.Args[0] + ` mktextr get-task-queue` + "\n" +
 		""
 }
 
@@ -45,8 +45,7 @@ func ParseEndpoint(
 	var (
 		mktextrFlags = flag.NewFlagSet("mktextr", flag.ContinueOnError)
 
-		mktextrGetTextureByIDFlags  = flag.NewFlagSet("get-texture-by-id", flag.ExitOnError)
-		mktextrGetTextureByIDIDFlag = mktextrGetTextureByIDFlags.String("id", "REQUIRED", "Texture ID")
+		mktextrGetTaskQueueFlags = flag.NewFlagSet("get-task-queue", flag.ExitOnError)
 
 		mktextrGetTextureByCoordinatesFlags       = flag.NewFlagSet("get-texture-by-coordinates", flag.ExitOnError)
 		mktextrGetTextureByCoordinatesWorldIDFlag = mktextrGetTextureByCoordinatesFlags.String("world-id", "REQUIRED", "")
@@ -58,7 +57,7 @@ func ParseEndpoint(
 		mktextrCompleteTaskTaskIDFlag = mktextrCompleteTaskFlags.String("task-id", "REQUIRED", "ID of the task")
 	)
 	mktextrFlags.Usage = mktextrUsage
-	mktextrGetTextureByIDFlags.Usage = mktextrGetTextureByIDUsage
+	mktextrGetTaskQueueFlags.Usage = mktextrGetTaskQueueUsage
 	mktextrGetTextureByCoordinatesFlags.Usage = mktextrGetTextureByCoordinatesUsage
 	mktextrCompleteTaskFlags.Usage = mktextrCompleteTaskUsage
 
@@ -96,8 +95,8 @@ func ParseEndpoint(
 		switch svcn {
 		case "mktextr":
 			switch epn {
-			case "get-texture-by-id":
-				epf = mktextrGetTextureByIDFlags
+			case "get-task-queue":
+				epf = mktextrGetTaskQueueFlags
 
 			case "get-texture-by-coordinates":
 				epf = mktextrGetTextureByCoordinatesFlags
@@ -130,9 +129,8 @@ func ParseEndpoint(
 		case "mktextr":
 			c := mktextrc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
-			case "get-texture-by-id":
-				endpoint = c.GetTextureByID()
-				data, err = mktextrc.BuildGetTextureByIDPayload(*mktextrGetTextureByIDIDFlag)
+			case "get-task-queue":
+				endpoint = c.GetTaskQueue()
 			case "get-texture-by-coordinates":
 				endpoint = c.GetTextureByCoordinates()
 				data, err = mktextrc.BuildGetTextureByCoordinatesPayload(*mktextrGetTextureByCoordinatesWorldIDFlag, *mktextrGetTextureByCoordinatesXFlag, *mktextrGetTextureByCoordinatesYFlag)
@@ -156,7 +154,7 @@ Usage:
     %[1]s [globalflags] mktextr COMMAND [flags]
 
 COMMAND:
-    get-texture-by-id: GetTextureByID implements getTextureById.
+    get-task-queue: GetTaskQueue implements GetTaskQueue.
     get-texture-by-coordinates: GetTextureByCoordinates implements getTextureByCoordinates.
     complete-task: CompleteTask implements completeTask.
 
@@ -164,14 +162,13 @@ Additional help:
     %[1]s mktextr COMMAND --help
 `, os.Args[0])
 }
-func mktextrGetTextureByIDUsage() {
-	fmt.Fprintf(os.Stderr, `%[1]s [flags] mktextr get-texture-by-id -id STRING
+func mktextrGetTaskQueueUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] mktextr get-task-queue
 
-GetTextureByID implements getTextureById.
-    -id STRING: Texture ID
+GetTaskQueue implements GetTaskQueue.
 
 Example:
-    %[1]s mktextr get-texture-by-id --id "Ab id quo."
+    %[1]s mktextr get-task-queue
 `, os.Args[0])
 }
 
@@ -184,7 +181,7 @@ GetTextureByCoordinates implements getTextureByCoordinates.
     -y INT: 
 
 Example:
-    %[1]s mktextr get-texture-by-coordinates --world-id "Quia deserunt sit ducimus maxime et velit." --x 5429597880375743933 --y 2225197571073222491
+    %[1]s mktextr get-texture-by-coordinates --world-id "Asperiores praesentium." --x 519887796312453698 --y 5290486007691937039
 `, os.Args[0])
 }
 
@@ -197,8 +194,8 @@ CompleteTask implements completeTask.
 
 Example:
     %[1]s mktextr complete-task --body '{
-      "file": "VmVybyBkZXNlcnVudCByZW0gaWQgbW9sZXN0aWFlIHF1aWRlbSBuaWhpbC4=",
-      "filename": "Qui et."
-   }' --task-id "Praesentium laborum corporis et."
+      "extension": "Autem velit placeat et.",
+      "file": "VmVsaXQgZXQgcmVwdWRpYW5kYWUu"
+   }' --task-id "Dolorem quia consequatur saepe atque ut nesciunt."
 `, os.Args[0])
 }

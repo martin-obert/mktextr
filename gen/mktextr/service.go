@@ -9,15 +9,14 @@ package mktextr
 
 import (
 	"context"
-	mktextrviews "mktextr/gen/mktextr/views"
 )
 
 // Texture store
 type Service interface {
-	// GetTextureByID implements getTextureById.
-	GetTextureByID(context.Context, *GetTextureByIDPayload) (err error)
+	// GetTaskQueue implements GetTaskQueue.
+	GetTaskQueue(context.Context) (res *GetTaskQueueResult, err error)
 	// GetTextureByCoordinates implements getTextureByCoordinates.
-	GetTextureByCoordinates(context.Context, *GetTextureByCoordinatesPayload) (res *GetResult, err error)
+	GetTextureByCoordinates(context.Context, *GetTextureByCoordinatesPayload) (res *GetTextureByCoordinatesResponse, err error)
 	// CompleteTask implements completeTask.
 	CompleteTask(context.Context, *CompleteTaskPayload) (err error)
 }
@@ -36,26 +35,23 @@ const ServiceName = "mktextr"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [3]string{"getTextureById", "getTextureByCoordinates", "completeTask"}
+var MethodNames = [3]string{"GetTaskQueue", "getTextureByCoordinates", "completeTask"}
 
 // CompleteTaskPayload is the payload type of the mktextr service completeTask
 // method.
 type CompleteTaskPayload struct {
 	// The file to upload
 	File []byte `encoding:"form"`
-	// Name of the file
-	Filename string `encoding:"form"`
+	// ID of the task
+	Extension string `encoding:"form"`
 	// ID of the task
 	TaskID string
 }
 
-// GetResult is the result type of the mktextr service getTextureByCoordinates
+// GetTaskQueueResult is the result type of the mktextr service GetTaskQueue
 // method.
-type GetResult struct {
-	StatusCode    *string
-	TaskID        *string
-	BaseMapURL    *string
-	ContourMapURL *string
+type GetTaskQueueResult struct {
+	Tasks []string
 }
 
 // GetTextureByCoordinatesPayload is the payload type of the mktextr service
@@ -69,43 +65,11 @@ type GetTextureByCoordinatesPayload struct {
 	WorldID string
 }
 
-// GetTextureByIDPayload is the payload type of the mktextr service
-// getTextureById method.
-type GetTextureByIDPayload struct {
-	// Texture ID
-	ID string
-}
-
-// NewGetResult initializes result type GetResult from viewed result type
-// GetResult.
-func NewGetResult(vres *mktextrviews.GetResult) *GetResult {
-	return newGetResult(vres.Projected)
-}
-
-// NewViewedGetResult initializes viewed result type GetResult from result type
-// GetResult using the given view.
-func NewViewedGetResult(res *GetResult, view string) *mktextrviews.GetResult {
-	p := newGetResultView(res)
-	return &mktextrviews.GetResult{Projected: p, View: "default"}
-}
-
-// newGetResult converts projected type GetResult to service type GetResult.
-func newGetResult(vres *mktextrviews.GetResultView) *GetResult {
-	res := &GetResult{
-		TaskID:        vres.TaskID,
-		BaseMapURL:    vres.BaseMapURL,
-		ContourMapURL: vres.ContourMapURL,
-	}
-	return res
-}
-
-// newGetResultView projects result type GetResult to projected type
-// GetResultView using the "default" view.
-func newGetResultView(res *GetResult) *mktextrviews.GetResultView {
-	vres := &mktextrviews.GetResultView{
-		TaskID:        res.TaskID,
-		BaseMapURL:    res.BaseMapURL,
-		ContourMapURL: res.ContourMapURL,
-	}
-	return vres
+// GetTextureByCoordinatesResponse is the result type of the mktextr service
+// getTextureByCoordinates method.
+type GetTextureByCoordinatesResponse struct {
+	TextureSetState *string
+	BaseMapURL      *string
+	ContourMapURL   *string
+	SubState        *string
 }

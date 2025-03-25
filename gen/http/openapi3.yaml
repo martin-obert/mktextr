@@ -6,6 +6,23 @@ servers:
     - url: http://localhost:80
       description: Default server for mktextr
 paths:
+    /tasks:
+        get:
+            tags:
+                - mktextr
+            summary: GetTaskQueue mktextr
+            operationId: mktextr#GetTaskQueue
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetTaskQueueResponseBody'
+                            example:
+                                tasks:
+                                    - Deserunt sit ducimus.
+                                    - Et velit eos non optio molestiae nam.
     /tasks/{taskId}/complete:
         patch:
             tags:
@@ -20,8 +37,8 @@ paths:
                   schema:
                     type: string
                     description: ID of the task
-                    example: Odio praesentium.
-                  example: Nihil est ducimus in.
+                    example: Est minima.
+                  example: Ut impedit aut.
             requestBody:
                 required: true
                 content:
@@ -29,52 +46,29 @@ paths:
                         schema:
                             $ref: '#/components/schemas/CompleteTaskRequestBody'
                         example:
+                            extension: Autem velit placeat et.
                             file:
                                 - 86
                                 - 101
-                                - 114
-                                - 111
-                                - 32
-                                - 100
-                                - 101
-                                - 115
-                                - 101
-                                - 114
-                                - 117
-                                - 110
-                                - 116
-                                - 32
-                                - 114
-                                - 101
-                                - 109
-                                - 32
-                                - 105
-                                - 100
-                                - 32
-                                - 109
-                                - 111
                                 - 108
-                                - 101
-                                - 115
+                                - 105
                                 - 116
+                                - 32
+                                - 101
+                                - 116
+                                - 32
+                                - 114
+                                - 101
+                                - 112
+                                - 117
+                                - 100
                                 - 105
                                 - 97
-                                - 101
-                                - 32
-                                - 113
-                                - 117
-                                - 105
-                                - 100
-                                - 101
-                                - 109
-                                - 32
                                 - 110
-                                - 105
-                                - 104
-                                - 105
-                                - 108
+                                - 100
+                                - 97
+                                - 101
                                 - 46
-                            filename: Qui et.
             responses:
                 "200":
                     description: OK response.
@@ -93,8 +87,8 @@ paths:
                   schema:
                     type: string
                     description: WorldId
-                    example: Rerum accusamus.
-                  example: Doloribus quibusdam.
+                    example: Debitis veniam deleniti.
+                  example: Qui quis nobis dolores.
                 - name: x
                   in: query
                   description: Texture X
@@ -103,9 +97,9 @@ paths:
                   schema:
                     type: integer
                     description: Texture X
-                    example: 4748271283784381903
+                    example: 7117580923803438106
                     format: int64
-                  example: 7523923742862776932
+                  example: 683409081616245358
                 - name: "y"
                   in: query
                   description: Texture Y
@@ -114,189 +108,137 @@ paths:
                   schema:
                     type: integer
                     description: Texture Y
-                    example: 276245859482169956
+                    example: 3599830644514005638
                     format: int64
-                  example: 3784236015956481100
+                  example: 5002806041006688025
             responses:
                 "200":
                     description: OK response.
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/MktextrGetTextureByCoordinatesOKResponseBody'
+                                $ref: '#/components/schemas/GetTextureByCoordinatesResponse'
                             example:
-                                baseMapUrl: Facere quibusdam.
-                                contourMapUrl: Dolore voluptatem incidunt.
-                                taskId: Molestiae nam est asperiores.
-                "202":
-                    description: Accepted response.
+                                baseMapUrl: Corporis nihil autem.
+                                contourMapUrl: Vero deserunt rem id molestiae quidem nihil.
+                                sub_state: Qui et.
+                                texture_set_state: Dolore voluptatem incidunt.
+                "206":
+                    description: Partial Content response.
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/MktextrGetTextureByCoordinatesOKResponseBody'
+                                $ref: '#/components/schemas/GetTextureByCoordinatesResponse'
                             example:
-                                baseMapUrl: Facere quibusdam.
-                                contourMapUrl: Dolore voluptatem incidunt.
-                                taskId: Molestiae nam est asperiores.
+                                baseMapUrl: Temporibus voluptate vel voluptas velit.
+                                contourMapUrl: Possimus possimus aut.
+                                sub_state: Impedit recusandae reprehenderit et repellat qui.
+                                texture_set_state: Praesentium laborum corporis et.
                 "400":
                     description: Bad Request response.
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/MktextrGetTextureByCoordinatesOKResponseBody'
+                                $ref: '#/components/schemas/GetTextureByCoordinatesResponse'
                             example:
-                                baseMapUrl: Facere quibusdam.
-                                contourMapUrl: Dolore voluptatem incidunt.
-                                taskId: Molestiae nam est asperiores.
-    /textures/{id}:
-        get:
-            tags:
-                - mktextr
-            summary: getTextureById mktextr
-            operationId: mktextr#getTextureById
-            parameters:
-                - name: id
-                  in: path
-                  description: Texture ID
-                  required: true
-                  schema:
-                    type: string
-                    description: Texture ID
-                    example: Consequuntur quia assumenda.
-                  example: Est eaque dolorum.
-            responses:
-                "204":
-                    description: No Content response.
+                                baseMapUrl: Fugit nemo dolorem.
+                                contourMapUrl: Consequatur impedit voluptas adipisci consectetur voluptate quia.
+                                sub_state: Saepe iure repellendus perferendis quasi et.
+                                texture_set_state: Dicta maxime.
 components:
     schemas:
         CompleteTaskRequestBody:
             type: object
             properties:
+                extension:
+                    type: string
+                    description: ID of the task
+                    example: Qui dolores possimus voluptas culpa ea.
                 file:
                     type: string
                     description: The file to upload
                     example:
-                        - 69
+                        - 78
+                        - 105
+                        - 104
+                        - 105
+                        - 108
+                        - 32
+                        - 101
+                        - 115
                         - 116
                         - 32
                         - 100
-                        - 111
-                        - 108
-                        - 111
-                        - 114
+                        - 117
+                        - 99
                         - 105
-                        - 98
+                        - 109
                         - 117
                         - 115
                         - 32
-                        - 117
-                        - 116
-                        - 32
                         - 105
-                        - 112
-                        - 115
-                        - 97
-                        - 32
-                        - 101
-                        - 116
-                        - 32
-                        - 101
-                        - 116
-                        - 32
-                        - 97
-                        - 117
-                        - 116
+                        - 110
                         - 46
                     format: binary
-                filename:
-                    type: string
-                    description: Name of the file
-                    example: Alias omnis et.
             example:
+                extension: Possimus omnis nostrum magni.
                 file:
-                    - 69
-                    - 115
-                    - 115
-                    - 101
-                    - 32
-                    - 115
+                    - 86
+                    - 111
+                    - 108
                     - 117
-                    - 115
-                    - 99
-                    - 105
                     - 112
-                    - 105
-                    - 116
-                    - 32
-                    - 118
-                    - 101
-                    - 114
-                    - 105
                     - 116
                     - 97
                     - 116
-                    - 105
+                    - 101
                     - 115
                     - 32
                     - 97
-                    - 108
-                    - 105
-                    - 113
                     - 117
-                    - 97
-                    - 109
-                    - 32
-                    - 100
-                    - 101
-                    - 108
-                    - 101
-                    - 110
-                    - 105
                     - 116
-                    - 105
                     - 46
-                filename: In quia pariatur.
             required:
                 - file
-                - filename
-        GetResult:
+                - extension
+        GetTaskQueueResponseBody:
             type: object
             properties:
-                baseMapUrl:
-                    type: string
-                    example: Enim nihil.
-                contourMapUrl:
-                    type: string
-                    example: Veniam error laudantium blanditiis vitae.
-                status_code:
-                    type: string
-                    example: Sed dolor dolores.
-                taskId:
-                    type: string
-                    example: Qui aliquid sapiente.
-            description: Texture set payload
+                tasks:
+                    type: array
+                    items:
+                        type: string
+                        example: Alias omnis et.
+                    example:
+                        - Suscipit veritatis aliquam deleniti aut in.
+                        - Pariatur sunt.
+                        - Quia assumenda natus.
             example:
-                baseMapUrl: Exercitationem dolor debitis nisi voluptatem aut perferendis.
-                contourMapUrl: Corporis beatae vero qui voluptatem.
-                status_code: Laborum excepturi in.
-                taskId: Ab possimus quia molestias adipisci omnis.
-        MktextrGetTextureByCoordinatesOKResponseBody:
+                tasks:
+                    - Dolorum occaecati rerum accusamus sint.
+                    - Quibusdam delectus qui ut nihil.
+                    - Odio praesentium.
+        GetTextureByCoordinatesResponse:
             type: object
             properties:
                 baseMapUrl:
-                    type: string
-                    example: Quos at.
-                contourMapUrl:
-                    type: string
-                    example: Esse veniam omnis tempora sint non.
-                taskId:
                     type: string
                     example: Voluptatem tenetur eius optio consequatur.
-            description: GetTextureByCoordinatesOKResponseBody result type (default view)
+                contourMapUrl:
+                    type: string
+                    example: Quos at.
+                sub_state:
+                    type: string
+                    example: Esse veniam omnis tempora sint non.
+                texture_set_state:
+                    type: string
+                    example: Corporis beatae vero qui voluptatem.
+            description: Texture set payload
             example:
                 baseMapUrl: Voluptate reprehenderit assumenda unde eius dicta harum.
                 contourMapUrl: Alias aspernatur fugiat sint.
-                taskId: Dolorem similique non reprehenderit.
+                sub_state: Et doloribus ut ipsa et et aut.
+                texture_set_state: Dolorem similique non reprehenderit.
 tags:
     - name: mktextr
       description: Texture store

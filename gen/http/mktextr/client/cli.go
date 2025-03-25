@@ -16,19 +16,6 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// BuildGetTextureByIDPayload builds the payload for the mktextr getTextureById
-// endpoint from CLI flags.
-func BuildGetTextureByIDPayload(mktextrGetTextureByIDID string) (*mktextr.GetTextureByIDPayload, error) {
-	var id string
-	{
-		id = mktextrGetTextureByIDID
-	}
-	v := &mktextr.GetTextureByIDPayload{}
-	v.ID = id
-
-	return v, nil
-}
-
 // BuildGetTextureByCoordinatesPayload builds the payload for the mktextr
 // getTextureByCoordinates endpoint from CLI flags.
 func BuildGetTextureByCoordinatesPayload(mktextrGetTextureByCoordinatesWorldID string, mktextrGetTextureByCoordinatesX string, mktextrGetTextureByCoordinatesY string) (*mktextr.GetTextureByCoordinatesPayload, error) {
@@ -71,7 +58,7 @@ func BuildCompleteTaskPayload(mktextrCompleteTaskBody string, mktextrCompleteTas
 	{
 		err = json.Unmarshal([]byte(mktextrCompleteTaskBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"file\": \"VmVybyBkZXNlcnVudCByZW0gaWQgbW9sZXN0aWFlIHF1aWRlbSBuaWhpbC4=\",\n      \"filename\": \"Qui et.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"extension\": \"Autem velit placeat et.\",\n      \"file\": \"VmVsaXQgZXQgcmVwdWRpYW5kYWUu\"\n   }'")
 		}
 		if body.File == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("file", "body"))
@@ -85,8 +72,8 @@ func BuildCompleteTaskPayload(mktextrCompleteTaskBody string, mktextrCompleteTas
 		taskID = mktextrCompleteTaskTaskID
 	}
 	v := &mktextr.CompleteTaskPayload{
-		File:     body.File,
-		Filename: body.Filename,
+		File:      body.File,
+		Extension: body.Extension,
 	}
 	v.TaskID = taskID
 

@@ -9,7 +9,6 @@ package server
 
 import (
 	mktextr "mktextr/gen/mktextr"
-	mktextrviews "mktextr/gen/mktextr/views"
 
 	goa "goa.design/goa/v3/pkg"
 )
@@ -19,54 +18,78 @@ import (
 type CompleteTaskRequestBody struct {
 	// The file to upload
 	File []byte `encoding:"form"`
-	// Name of the file
-	Filename *string `encoding:"form"`
+	// ID of the task
+	Extension *string `encoding:"form"`
+}
+
+// GetTaskQueueResponseBody is the type of the "mktextr" service "GetTaskQueue"
+// endpoint HTTP response body.
+type GetTaskQueueResponseBody struct {
+	Tasks []string `form:"tasks,omitempty" json:"tasks,omitempty" xml:"tasks,omitempty"`
 }
 
 // GetTextureByCoordinatesOKResponseBody is the type of the "mktextr" service
 // "getTextureByCoordinates" endpoint HTTP response body.
 type GetTextureByCoordinatesOKResponseBody struct {
-	TaskID        *string `form:"taskId,omitempty" json:"taskId,omitempty" xml:"taskId,omitempty"`
-	BaseMapURL    *string `form:"baseMapUrl,omitempty" json:"baseMapUrl,omitempty" xml:"baseMapUrl,omitempty"`
-	ContourMapURL *string `form:"contourMapUrl,omitempty" json:"contourMapUrl,omitempty" xml:"contourMapUrl,omitempty"`
+	TextureSetState *string `form:"texture_set_state,omitempty" json:"texture_set_state,omitempty" xml:"texture_set_state,omitempty"`
+	BaseMapURL      *string `form:"baseMapUrl,omitempty" json:"baseMapUrl,omitempty" xml:"baseMapUrl,omitempty"`
+	ContourMapURL   *string `form:"contourMapUrl,omitempty" json:"contourMapUrl,omitempty" xml:"contourMapUrl,omitempty"`
+	SubState        *string `form:"sub_state,omitempty" json:"sub_state,omitempty" xml:"sub_state,omitempty"`
 }
 
-// GetTextureByCoordinatesAcceptedResponseBody is the type of the "mktextr"
-// service "getTextureByCoordinates" endpoint HTTP response body.
-type GetTextureByCoordinatesAcceptedResponseBody struct {
-	TaskID        *string `form:"taskId,omitempty" json:"taskId,omitempty" xml:"taskId,omitempty"`
-	BaseMapURL    *string `form:"baseMapUrl,omitempty" json:"baseMapUrl,omitempty" xml:"baseMapUrl,omitempty"`
-	ContourMapURL *string `form:"contourMapUrl,omitempty" json:"contourMapUrl,omitempty" xml:"contourMapUrl,omitempty"`
+// GetTextureByCoordinatesPartialContentResponseBody is the type of the
+// "mktextr" service "getTextureByCoordinates" endpoint HTTP response body.
+type GetTextureByCoordinatesPartialContentResponseBody struct {
+	TextureSetState *string `form:"texture_set_state,omitempty" json:"texture_set_state,omitempty" xml:"texture_set_state,omitempty"`
+	BaseMapURL      *string `form:"baseMapUrl,omitempty" json:"baseMapUrl,omitempty" xml:"baseMapUrl,omitempty"`
+	ContourMapURL   *string `form:"contourMapUrl,omitempty" json:"contourMapUrl,omitempty" xml:"contourMapUrl,omitempty"`
+	SubState        *string `form:"sub_state,omitempty" json:"sub_state,omitempty" xml:"sub_state,omitempty"`
 }
 
 // GetTextureByCoordinatesBadRequestResponseBody is the type of the "mktextr"
 // service "getTextureByCoordinates" endpoint HTTP response body.
 type GetTextureByCoordinatesBadRequestResponseBody struct {
-	TaskID        *string `form:"taskId,omitempty" json:"taskId,omitempty" xml:"taskId,omitempty"`
-	BaseMapURL    *string `form:"baseMapUrl,omitempty" json:"baseMapUrl,omitempty" xml:"baseMapUrl,omitempty"`
-	ContourMapURL *string `form:"contourMapUrl,omitempty" json:"contourMapUrl,omitempty" xml:"contourMapUrl,omitempty"`
+	TextureSetState *string `form:"texture_set_state,omitempty" json:"texture_set_state,omitempty" xml:"texture_set_state,omitempty"`
+	BaseMapURL      *string `form:"baseMapUrl,omitempty" json:"baseMapUrl,omitempty" xml:"baseMapUrl,omitempty"`
+	ContourMapURL   *string `form:"contourMapUrl,omitempty" json:"contourMapUrl,omitempty" xml:"contourMapUrl,omitempty"`
+	SubState        *string `form:"sub_state,omitempty" json:"sub_state,omitempty" xml:"sub_state,omitempty"`
+}
+
+// NewGetTaskQueueResponseBody builds the HTTP response body from the result of
+// the "GetTaskQueue" endpoint of the "mktextr" service.
+func NewGetTaskQueueResponseBody(res *mktextr.GetTaskQueueResult) *GetTaskQueueResponseBody {
+	body := &GetTaskQueueResponseBody{}
+	if res.Tasks != nil {
+		body.Tasks = make([]string, len(res.Tasks))
+		for i, val := range res.Tasks {
+			body.Tasks[i] = val
+		}
+	}
+	return body
 }
 
 // NewGetTextureByCoordinatesOKResponseBody builds the HTTP response body from
 // the result of the "getTextureByCoordinates" endpoint of the "mktextr"
 // service.
-func NewGetTextureByCoordinatesOKResponseBody(res *mktextrviews.GetResultView) *GetTextureByCoordinatesOKResponseBody {
+func NewGetTextureByCoordinatesOKResponseBody(res *mktextr.GetTextureByCoordinatesResponse) *GetTextureByCoordinatesOKResponseBody {
 	body := &GetTextureByCoordinatesOKResponseBody{
-		TaskID:        res.TaskID,
-		BaseMapURL:    res.BaseMapURL,
-		ContourMapURL: res.ContourMapURL,
+		TextureSetState: res.TextureSetState,
+		BaseMapURL:      res.BaseMapURL,
+		ContourMapURL:   res.ContourMapURL,
+		SubState:        res.SubState,
 	}
 	return body
 }
 
-// NewGetTextureByCoordinatesAcceptedResponseBody builds the HTTP response body
-// from the result of the "getTextureByCoordinates" endpoint of the "mktextr"
-// service.
-func NewGetTextureByCoordinatesAcceptedResponseBody(res *mktextrviews.GetResultView) *GetTextureByCoordinatesAcceptedResponseBody {
-	body := &GetTextureByCoordinatesAcceptedResponseBody{
-		TaskID:        res.TaskID,
-		BaseMapURL:    res.BaseMapURL,
-		ContourMapURL: res.ContourMapURL,
+// NewGetTextureByCoordinatesPartialContentResponseBody builds the HTTP
+// response body from the result of the "getTextureByCoordinates" endpoint of
+// the "mktextr" service.
+func NewGetTextureByCoordinatesPartialContentResponseBody(res *mktextr.GetTextureByCoordinatesResponse) *GetTextureByCoordinatesPartialContentResponseBody {
+	body := &GetTextureByCoordinatesPartialContentResponseBody{
+		TextureSetState: res.TextureSetState,
+		BaseMapURL:      res.BaseMapURL,
+		ContourMapURL:   res.ContourMapURL,
+		SubState:        res.SubState,
 	}
 	return body
 }
@@ -74,22 +97,14 @@ func NewGetTextureByCoordinatesAcceptedResponseBody(res *mktextrviews.GetResultV
 // NewGetTextureByCoordinatesBadRequestResponseBody builds the HTTP response
 // body from the result of the "getTextureByCoordinates" endpoint of the
 // "mktextr" service.
-func NewGetTextureByCoordinatesBadRequestResponseBody(res *mktextrviews.GetResultView) *GetTextureByCoordinatesBadRequestResponseBody {
+func NewGetTextureByCoordinatesBadRequestResponseBody(res *mktextr.GetTextureByCoordinatesResponse) *GetTextureByCoordinatesBadRequestResponseBody {
 	body := &GetTextureByCoordinatesBadRequestResponseBody{
-		TaskID:        res.TaskID,
-		BaseMapURL:    res.BaseMapURL,
-		ContourMapURL: res.ContourMapURL,
+		TextureSetState: res.TextureSetState,
+		BaseMapURL:      res.BaseMapURL,
+		ContourMapURL:   res.ContourMapURL,
+		SubState:        res.SubState,
 	}
 	return body
-}
-
-// NewGetTextureByIDPayload builds a mktextr service getTextureById endpoint
-// payload.
-func NewGetTextureByIDPayload(id string) *mktextr.GetTextureByIDPayload {
-	v := &mktextr.GetTextureByIDPayload{}
-	v.ID = id
-
-	return v
 }
 
 // NewGetTextureByCoordinatesPayload builds a mktextr service
@@ -107,8 +122,8 @@ func NewGetTextureByCoordinatesPayload(worldID string, x int, y int) *mktextr.Ge
 // payload.
 func NewCompleteTaskPayload(body *CompleteTaskRequestBody, taskID string) *mktextr.CompleteTaskPayload {
 	v := &mktextr.CompleteTaskPayload{
-		File:     body.File,
-		Filename: *body.Filename,
+		File:      body.File,
+		Extension: *body.Extension,
 	}
 	v.TaskID = taskID
 
@@ -121,8 +136,8 @@ func ValidateCompleteTaskRequestBody(body *CompleteTaskRequestBody) (err error) 
 	if body.File == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("file", "body"))
 	}
-	if body.Filename == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("filename", "body"))
+	if body.Extension == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("extension", "body"))
 	}
 	return
 }

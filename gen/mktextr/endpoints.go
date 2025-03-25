@@ -15,7 +15,7 @@ import (
 
 // Endpoints wraps the "mktextr" service endpoints.
 type Endpoints struct {
-	GetTextureByID          goa.Endpoint
+	GetTaskQueue            goa.Endpoint
 	GetTextureByCoordinates goa.Endpoint
 	CompleteTask            goa.Endpoint
 }
@@ -23,7 +23,7 @@ type Endpoints struct {
 // NewEndpoints wraps the methods of the "mktextr" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
-		GetTextureByID:          NewGetTextureByIDEndpoint(s),
+		GetTaskQueue:            NewGetTaskQueueEndpoint(s),
 		GetTextureByCoordinates: NewGetTextureByCoordinatesEndpoint(s),
 		CompleteTask:            NewCompleteTaskEndpoint(s),
 	}
@@ -31,17 +31,16 @@ func NewEndpoints(s Service) *Endpoints {
 
 // Use applies the given middleware to all the "mktextr" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
-	e.GetTextureByID = m(e.GetTextureByID)
+	e.GetTaskQueue = m(e.GetTaskQueue)
 	e.GetTextureByCoordinates = m(e.GetTextureByCoordinates)
 	e.CompleteTask = m(e.CompleteTask)
 }
 
-// NewGetTextureByIDEndpoint returns an endpoint function that calls the method
-// "getTextureById" of service "mktextr".
-func NewGetTextureByIDEndpoint(s Service) goa.Endpoint {
+// NewGetTaskQueueEndpoint returns an endpoint function that calls the method
+// "GetTaskQueue" of service "mktextr".
+func NewGetTaskQueueEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
-		p := req.(*GetTextureByIDPayload)
-		return nil, s.GetTextureByID(ctx, p)
+		return s.GetTaskQueue(ctx)
 	}
 }
 
@@ -50,12 +49,7 @@ func NewGetTextureByIDEndpoint(s Service) goa.Endpoint {
 func NewGetTextureByCoordinatesEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*GetTextureByCoordinatesPayload)
-		res, err := s.GetTextureByCoordinates(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedGetResult(res, "default")
-		return vres, nil
+		return s.GetTextureByCoordinates(ctx, p)
 	}
 }
 

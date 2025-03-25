@@ -20,71 +20,64 @@ type MongoTextureRefRepository struct {
 	dbContext *MongoDbContext
 }
 
-func (m MongoTextureRefRepository) GetTextureRefByCoordinates(ctx context.Context, worldId string, x int, y int) (domain.TextureRef, error) {
-	c := m.dbContext.textureRefsCollection.FindOne(ctx, bson.M{"world_id": worldId, "x": x, "y": y}, options.FindOne())
+func (m MongoTextureRefRepository) GetTextureSetById(ctx context.Context, id string) (domain.TextureSet, error) {
+	c := m.dbContext.textureRefsCollection.FindOne(ctx,
+		bson.M{
+			"_id": id,
+		}, options.FindOne())
 
-	var result TextureRefDataModel
+	var result TextureSetDataModel
 
 	err := c.Decode(&result)
 
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return domain.TextureRef{}, domain.TextureRefNotFound
+			return domain.TextureSet{}, domain.TextureRefNotFoundErr
 		}
-		return domain.TextureRef{}, err
+		return domain.TextureSet{}, err
 	}
 
-	return toDomain(result), nil
+	return result.toDomain(), nil
 }
 
-func (m MongoTextureRefRepository) InsertTextureRef(ctx context.Context, meta domain.StoredTextureMeta, worldId string, x int, y int) (domain.TextureRef, error) {
+func (m MongoTextureRefRepository) GetTextureSetByAddress(ctx context.Context, address domain.TextureAddress) (domain.TextureSet, error) {
+	c := m.dbContext.textureRefsCollection.FindOne(ctx,
+		bson.M{
+			"address": bson.M{
+				"world_id": address.WorldId,
+				"x":        address.X,
+				"y":        address.Y,
+			},
+		}, options.FindOne())
 
-	var data = TextureRefDataModel{
-		Uri:     meta.Uri,
-		FileId:  meta.FileId,
-		WorldId: worldId,
-		X:       x,
-		Y:       y,
-	}
-	one, err := m.dbContext.textureRefsCollection.InsertOne(ctx, data)
+	var result TextureSetDataModel
+
+	err := c.Decode(&result)
+
 	if err != nil {
-		return domain.TextureRef{}, err
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return domain.TextureSet{}, domain.TextureRefNotFoundErr
+		}
+		return domain.TextureSet{}, err
 	}
 
-	return toDomain(TextureRefDataModel{
-		Id:     one.InsertedID.(bson.ObjectID),
-		Uri:    data.Uri,
-		FileId: data.FileId,
-	}), nil
-
+	return result.toDomain(), nil
 }
 
-func (m MongoTextureRefRepository) GetTextureRefById(ctx context.Context, texRefId string) (domain.TextureRef, error) {
-	var data TextureRefDataModel
-	err := m.dbContext.textureRefsCollection.FindOne(ctx, bson.M{"_id": texRefId}).Decode(&data)
-	if err != nil {
-		return domain.TextureRef{}, err
-	}
-
-	return toDomain(data), nil
+func (m MongoTextureRefRepository) InsertTextureSet(ctx context.Context, model domain.TextureSet) (string, error) {
+	data := NewTextureSetDataModel(model)
+	o, err := m.dbContext.textureRefsCollection.InsertOne(ctx, data)
+	return o.InsertedID.(bson.ObjectID).Hex(), err
 }
 
-func (m MongoTextureRefRepository) QueryTextureRefs(ctx context.Context) ([]domain.TextureRef, error) {
-	cursor, err := m.dbContext.textureRefsCollection.Find(ctx, bson.D{})
-	if err != nil {
-		return []domain.TextureRef{}, err
-	}
-
-	var results []TextureRefDataModel
-	err = cursor.All(ctx, &results)
-
-	if err != nil {
-		return []domain.TextureRef{}, err
-	}
-	return toDomainArr(results), nil
+func (m MongoTextureRefRepository) UpdateTextureSet(ctx context.Context, model domain.TextureSet) error {
+	data := NewTextureSetDataModel(model)
+	filter := bson.M{"_id": model.Id}
+	_, err := m.dbContext.textureRefsCollection.ReplaceOne(ctx, filter, data)
+	return err
 }
 
-func NewMongoTextureRefRepository(ctx *MongoDbContext) domain.ITextureRefRepository {
+func NewMongoTextureRefRepository(ctx *MongoDbContext) domain.ITextureSetRepository {
 	return &MongoTextureRefRepository{dbContext: ctx}
 }
 
@@ -92,9 +85,32 @@ type RedisTaskRepository struct {
 	redisClient *redis.Client
 }
 
+func (r RedisTaskRepository) DeleteTaskFromQueue(ctx context.Context, taskId string) error {
+	return r.redisClient.SRem(ctx, taskQueueKey, taskId).Err()
+}
+
+func (r RedisTaskRepository) GetTaskQueue(ctx context.Context) ([]string, error) {
+	return r.redisClient.SMembers(ctx, taskQueueKey).Result()
+}
+
 func (r RedisTaskRepository) DeleteTask(ctx context.Context, taskId string) error {
-	c := r.redisClient.Del(ctx, taskId)
-	return c.Err()
+	key := taskId
+
+	p := r.redisClient.Pipeline()
+
+	err := p.SRem(ctx, taskQueueKey, key).Err()
+	if err != nil {
+		return err
+	}
+
+	err = p.Del(ctx, key).Err()
+	if err != nil {
+		return err
+	}
+
+	_, err = p.Exec(ctx)
+
+	return err
 }
 
 func (r RedisTaskRepository) GetTextureRenderingTask(ctx context.Context, taskId string) (domain.RenderImageTask, error) {
@@ -119,14 +135,30 @@ func (r RedisTaskRepository) GetTextureRenderingTask(ctx context.Context, taskId
 	return task, nil
 }
 
-func (r RedisTaskRepository) InsertTextureRenderingTask(ctx context.Context, task domain.RenderImageTask) error {
-	// Marshal the struct to JSON
-	jsonData, err := json.Marshal(task)
-	if err != nil {
-		return err
+const taskQueueKey = "task_queue"
+
+func (r RedisTaskRepository) InsertTextureRenderingTasks(ctx context.Context, tasks []domain.RenderImageTask) error {
+	p := r.redisClient.Pipeline()
+
+	for _, task := range tasks {
+		// Marshal the struct to JSON
+		jsonData, err := json.Marshal(task)
+		if err != nil {
+			return err
+		}
+		key := task.Id
+		err = p.Set(ctx, key, jsonData, 0).Err()
+		if err != nil {
+			return err
+		}
+
+		err = p.SAdd(ctx, taskQueueKey, task.Id).Err()
+		if err != nil {
+			return err
+		}
 	}
 
-	err = r.redisClient.Set(ctx, domain.TextureTaskId(task.WorldId, task.X, task.Y), jsonData, 0).Err()
+	_, err := p.Exec(ctx)
 	if err != nil {
 		return err
 	}
@@ -134,12 +166,10 @@ func (r RedisTaskRepository) InsertTextureRenderingTask(ctx context.Context, tas
 	return err
 }
 
-func NewRedisTaskRepository(address string, password string, db int) domain.ITaskRepository {
-	return &RedisTaskRepository{redis.NewClient(&redis.Options{
-		Addr:     address,
-		Password: password,
-		DB:       db,
-	})}
+func NewRedisTaskRepository(client *redis.Client) domain.ITaskRepository {
+	return &RedisTaskRepository{
+		redisClient: client,
+	}
 }
 
 type LocalTextureStorage struct {
@@ -189,14 +219,14 @@ func (t LocalTextureStorage) GetTextureById(textureId string) ([]byte, error) {
 	return data, nil
 }
 
-func (t LocalTextureStorage) StoreTexture(rawData []byte) (domain.StoredTextureMeta, error) {
+func (t LocalTextureStorage) StoreTexture(rawData []byte) (domain.TextureRef, error) {
 	fileId := uuid.New().String()
 	// Create (or overwrite) the file
 	var path = t.getFilePath(fileId)
 	file, err := os.Create(path)
 	if err != nil {
 		fmt.Println("Error creating file:", err)
-		return domain.StoredTextureMeta{}, err
+		return domain.TextureRef{}, err
 	}
 
 	defer func(file *os.File) {
@@ -210,10 +240,10 @@ func (t LocalTextureStorage) StoreTexture(rawData []byte) (domain.StoredTextureM
 	_, err = file.Write(rawData)
 	if err != nil {
 		fmt.Println("Error writing data:", err)
-		return domain.StoredTextureMeta{}, err
+		return domain.TextureRef{}, err
 	}
 
-	return domain.StoredTextureMeta{
+	return domain.TextureRef{
 		Uri:    path,
 		FileId: fileId,
 	}, nil
@@ -221,4 +251,60 @@ func (t LocalTextureStorage) StoreTexture(rawData []byte) (domain.StoredTextureM
 
 func NewLocalTextureStorage(rootFolder string) domain.ITextureStorage {
 	return &LocalTextureStorage{rootFolder: rootFolder}
+}
+
+type RedisTextureSetCache struct {
+	client *redis.Client
+}
+
+func NewRedisTextureCache(client *redis.Client) domain.ITextureSetCache {
+	return &RedisTextureSetCache{
+		client: client,
+	}
+}
+
+func getKeyFromId(id string) string {
+	return fmt.Sprintf("texture_set_cache:%s", id)
+}
+
+func (r RedisTextureSetCache) GetTextureSetByAddress(ctx context.Context, address domain.TextureAddress) (domain.TextureSet, error) {
+	key := getKeyFromId(address.String())
+	jsonResult, err := r.client.Get(ctx, key).Result()
+
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return domain.TextureSet{}, domain.ErrTextureSetNotFoundInCache
+		}
+		return domain.TextureSet{}, err
+	}
+
+	// Unmarshal back to struct
+	var textureSet domain.TextureSet
+	err = json.Unmarshal([]byte(jsonResult), &textureSet)
+
+	if err != nil {
+		return domain.TextureSet{}, err
+	}
+
+	return textureSet, nil
+}
+
+func (r RedisTextureSetCache) SetTextureSet(ctx context.Context, textureSet domain.TextureSet) (string, error) {
+	jsonData, err := json.Marshal(textureSet)
+	if err != nil {
+		return "", err
+	}
+
+	key := getKeyFromId(textureSet.Address.String())
+
+	err = r.client.Set(ctx, key, jsonData, 0).Err()
+	if err != nil {
+		return "", err
+	}
+	return key, nil
+}
+
+func (r RedisTextureSetCache) DelTextureSet(ctx context.Context, textureSet domain.TextureSet) error {
+	key := getKeyFromId(textureSet.Address.String())
+	return r.client.Del(ctx, key).Err()
 }

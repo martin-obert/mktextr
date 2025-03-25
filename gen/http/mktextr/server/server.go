@@ -20,7 +20,7 @@ import (
 // Server lists the mktextr service endpoint HTTP handlers.
 type Server struct {
 	Mounts                  []*MountPoint
-	GetTextureByID          http.Handler
+	GetTaskQueue            http.Handler
 	GetTextureByCoordinates http.Handler
 	CompleteTask            http.Handler
 }
@@ -57,11 +57,11 @@ func New(
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
-			{"GetTextureByID", "GET", "/textures/{id}"},
+			{"GetTaskQueue", "GET", "/tasks"},
 			{"GetTextureByCoordinates", "GET", "/textures"},
 			{"CompleteTask", "PATCH", "/tasks/{taskId}/complete"},
 		},
-		GetTextureByID:          NewGetTextureByIDHandler(e.GetTextureByID, mux, decoder, encoder, errhandler, formatter),
+		GetTaskQueue:            NewGetTaskQueueHandler(e.GetTaskQueue, mux, decoder, encoder, errhandler, formatter),
 		GetTextureByCoordinates: NewGetTextureByCoordinatesHandler(e.GetTextureByCoordinates, mux, decoder, encoder, errhandler, formatter),
 		CompleteTask:            NewCompleteTaskHandler(e.CompleteTask, mux, NewMktextrCompleteTaskDecoder(mux, mktextrCompleteTaskDecoderFn), encoder, errhandler, formatter),
 	}
@@ -72,7 +72,7 @@ func (s *Server) Service() string { return "mktextr" }
 
 // Use wraps the server handlers with the given middleware.
 func (s *Server) Use(m func(http.Handler) http.Handler) {
-	s.GetTextureByID = m(s.GetTextureByID)
+	s.GetTaskQueue = m(s.GetTaskQueue)
 	s.GetTextureByCoordinates = m(s.GetTextureByCoordinates)
 	s.CompleteTask = m(s.CompleteTask)
 }
@@ -82,7 +82,7 @@ func (s *Server) MethodNames() []string { return mktextr.MethodNames[:] }
 
 // Mount configures the mux to serve the mktextr endpoints.
 func Mount(mux goahttp.Muxer, h *Server) {
-	MountGetTextureByIDHandler(mux, h.GetTextureByID)
+	MountGetTaskQueueHandler(mux, h.GetTaskQueue)
 	MountGetTextureByCoordinatesHandler(mux, h.GetTextureByCoordinates)
 	MountCompleteTaskHandler(mux, h.CompleteTask)
 }
@@ -92,21 +92,21 @@ func (s *Server) Mount(mux goahttp.Muxer) {
 	Mount(mux, s)
 }
 
-// MountGetTextureByIDHandler configures the mux to serve the "mktextr" service
-// "getTextureById" endpoint.
-func MountGetTextureByIDHandler(mux goahttp.Muxer, h http.Handler) {
+// MountGetTaskQueueHandler configures the mux to serve the "mktextr" service
+// "GetTaskQueue" endpoint.
+func MountGetTaskQueueHandler(mux goahttp.Muxer, h http.Handler) {
 	f, ok := h.(http.HandlerFunc)
 	if !ok {
 		f = func(w http.ResponseWriter, r *http.Request) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("GET", "/textures/{id}", f)
+	mux.Handle("GET", "/tasks", f)
 }
 
-// NewGetTextureByIDHandler creates a HTTP handler which loads the HTTP request
-// and calls the "mktextr" service "getTextureById" endpoint.
-func NewGetTextureByIDHandler(
+// NewGetTaskQueueHandler creates a HTTP handler which loads the HTTP request
+// and calls the "mktextr" service "GetTaskQueue" endpoint.
+func NewGetTaskQueueHandler(
 	endpoint goa.Endpoint,
 	mux goahttp.Muxer,
 	decoder func(*http.Request) goahttp.Decoder,
@@ -115,22 +115,15 @@ func NewGetTextureByIDHandler(
 	formatter func(ctx context.Context, err error) goahttp.Statuser,
 ) http.Handler {
 	var (
-		decodeRequest  = DecodeGetTextureByIDRequest(mux, decoder)
-		encodeResponse = EncodeGetTextureByIDResponse(encoder)
+		encodeResponse = EncodeGetTaskQueueResponse(encoder)
 		encodeError    = goahttp.ErrorEncoder(encoder, formatter)
 	)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
-		ctx = context.WithValue(ctx, goa.MethodKey, "getTextureById")
+		ctx = context.WithValue(ctx, goa.MethodKey, "GetTaskQueue")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "mktextr")
-		payload, err := decodeRequest(r)
-		if err != nil {
-			if err := encodeError(ctx, w, err); err != nil {
-				errhandler(ctx, w, err)
-			}
-			return
-		}
-		res, err := endpoint(ctx, payload)
+		var err error
+		res, err := endpoint(ctx, nil)
 		if err != nil {
 			if err := encodeError(ctx, w, err); err != nil {
 				errhandler(ctx, w, err)

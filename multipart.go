@@ -43,9 +43,8 @@ func MktextrCompleteTaskDecoderFunc(mr *multipart.Reader, p **mktextr.CompleteTa
 				// can't process this entry, for some reason
 				panic(err)
 			}
-			filename := params["filename"]
 			res.File = bytes
-			res.Filename = filename
+			res.Extension = disposition
 
 			//imageUpload := images.ImageUpload{
 			//	Type:  &disposition,

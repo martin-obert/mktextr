@@ -11,9 +11,9 @@ import (
 	"fmt"
 )
 
-// GetTextureByIDMktextrPath returns the URL path to the mktextr service getTextureById HTTP endpoint.
-func GetTextureByIDMktextrPath(id string) string {
-	return fmt.Sprintf("/textures/%v", id)
+// GetTaskQueueMktextrPath returns the URL path to the mktextr service GetTaskQueue HTTP endpoint.
+func GetTaskQueueMktextrPath() string {
+	return "/tasks"
 }
 
 // GetTextureByCoordinatesMktextrPath returns the URL path to the mktextr service getTextureByCoordinates HTTP endpoint.

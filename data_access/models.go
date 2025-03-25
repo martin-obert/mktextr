@@ -4,6 +4,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"mktextr/domain"
 )
 
 const (
@@ -30,11 +31,14 @@ func NewMongoDbContext(connectionUri string) (*MongoDbContext, error) {
 	}, nil
 }
 
+type TextureSetDataModel struct {
+	Id       bson.ObjectID                              `bson:"_id,omitempty"`
+	Textures map[domain.TextureType]TextureRefDataModel `bson:"textures"`
+	Address  TextureAddressDataModel                    `bson:"address"`
+}
+
 type TextureRefDataModel struct {
-	Id      bson.ObjectID `bson:"_id,omitempty"`
-	Uri     string        `bson:"uri"`
-	FileId  string        `bson:"file_id"`
-	WorldId string        `bson:"world_id"`
-	X       int           `bson:"x"`
-	Y       int           `bson:"y"`
+	Uri    string              `bson:"uri,omitempty"`
+	FileId string              `bson:"file_id,omitempty"`
+	State  domain.TextureState `bson:"state"`
 }

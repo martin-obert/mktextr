@@ -19,9 +19,9 @@ import (
 
 // Client lists the mktextr service endpoint HTTP clients.
 type Client struct {
-	// GetTextureByID Doer is the HTTP client used to make requests to the
-	// getTextureById endpoint.
-	GetTextureByIDDoer goahttp.Doer
+	// GetTaskQueue Doer is the HTTP client used to make requests to the
+	// GetTaskQueue endpoint.
+	GetTaskQueueDoer goahttp.Doer
 
 	// GetTextureByCoordinates Doer is the HTTP client used to make requests to the
 	// getTextureByCoordinates endpoint.
@@ -55,7 +55,7 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
-		GetTextureByIDDoer:          doer,
+		GetTaskQueueDoer:            doer,
 		GetTextureByCoordinatesDoer: doer,
 		CompleteTaskDoer:            doer,
 		RestoreResponseBody:         restoreBody,
@@ -66,20 +66,20 @@ func NewClient(
 	}
 }
 
-// GetTextureByID returns an endpoint that makes HTTP requests to the mktextr
-// service getTextureById server.
-func (c *Client) GetTextureByID() goa.Endpoint {
+// GetTaskQueue returns an endpoint that makes HTTP requests to the mktextr
+// service GetTaskQueue server.
+func (c *Client) GetTaskQueue() goa.Endpoint {
 	var (
-		decodeResponse = DecodeGetTextureByIDResponse(c.decoder, c.RestoreResponseBody)
+		decodeResponse = DecodeGetTaskQueueResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildGetTextureByIDRequest(ctx, v)
+		req, err := c.BuildGetTaskQueueRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.GetTextureByIDDoer.Do(req)
+		resp, err := c.GetTaskQueueDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("mktextr", "getTextureById", err)
+			return nil, goahttp.ErrRequestError("mktextr", "GetTaskQueue", err)
 		}
 		return decodeResponse(resp)
 	}
