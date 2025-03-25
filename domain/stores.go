@@ -6,7 +6,7 @@ import (
 )
 
 type ITextureStorage interface {
-	StoreTexture(rawData []byte) (TextureRef, error)
+	StoreTexture(rawData []byte, extension string) (TextureRef, error)
 	GetTextureById(textureId string) ([]byte, error)
 	DeleteTextureById(textureId string) error
 }

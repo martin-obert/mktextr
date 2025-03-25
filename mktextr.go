@@ -2,6 +2,7 @@ package mktextrapi
 
 import (
 	"context"
+	"github.com/caarlos0/env/v11"
 	"github.com/redis/go-redis/v9"
 	"mktextr/data_access"
 	"mktextr/domain"
@@ -66,31 +67,6 @@ func (m mktextrsrvc) GetTextureByCoordinates(ctx context.Context, payload *mktex
 
 }
 
-//func (m mktextrsrvc) GetTextureByCoordinates(ctx context.Context, payload *mktextr.GetTextureByCoordinatesPayload) (res *mktextr.GetTextureByCoordinatesResult, err error) {
-
-//texRef, err := m.repository.GetTextureRefByCoordinates(ctx, payload.WorldID, payload.X, payload.Y)
-//if err != nil {
-//	if errors.Is(err, domain.TextureRefNotFoundErr) {
-//		t, cErr := m.taskManager.CreateTextureSetTasks(ctx, payload.WorldID, payload.X, payload.Y)
-//		if cErr != nil {
-//			return nil, cErr
-//		}
-//
-//		return &mktextr.GetTextureByCoordinatesResult{
-//			XmktextrTaskID: &t,
-//			Location:       nil,
-//		}, nil
-//	}
-//
-//	return nil, err
-//}
-//
-//return &mktextr.GetTextureByCoordinatesResult{
-//	Location:       &texRef.BaseMapUri,
-//	XmktextrTaskID: nil,
-//}, nil
-//}
-
 func (m mktextrsrvc) CompleteTask(ctx context.Context, payload *mktextr.CompleteTaskPayload) (err error) {
 	tId, err := domain.DecodeTaskId(payload.TaskID)
 	if err != nil {
@@ -102,7 +78,7 @@ func (m mktextrsrvc) CompleteTask(ctx context.Context, payload *mktextr.Complete
 		return err
 	}
 
-	p, err := m.textureStorage.StoreTexture(payload.File)
+	p, err := m.textureStorage.StoreTexture(payload.File, payload.Extension)
 
 	if err != nil {
 		return err
@@ -111,59 +87,30 @@ func (m mktextrsrvc) CompleteTask(ctx context.Context, payload *mktextr.Complete
 	return m.store.SetTextureAt(ctx, t.Address, t.TextureType, p)
 }
 
-//
-//func (s *mktextrsrvc) CompleteTask(ctx context.Context, payload *mktextr.CompleteTaskPayload) (res *mktextr.TextureReferencePayload, err error) {
-//	tr, err := s.taskManager.CompleteTask(ctx, payload.TaskID)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	m, err := s.textureStorage.StoreTexture(payload.File)
-//	if err != nil {
-//		return nil, err
-//	}
-//	r, err := s.repository.InsertTextureSet(ctx, m, tr.WorldId, tr.X, tr.Y)
-//
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return &mktextr.TextureReferencePayload{
-//		ID: &r.Id,
-//	}, err
-//}
-//
-//func (s *mktextrsrvc) GetTextureByCoordinates(ctx context.Context, payload *mktextr.GetTextureByCoordinatesPayload) (res *mktextr.TextureReferencePayload, err error) {
-//	texRef, err := s.repository.GetTextureRefByCoordinates(ctx, payload.WorldID, payload.X, payload.Y)
-//	if err != nil {
-//		if errors.Is(err, domain.TextureRefNotFoundErr) {
-//			t, cErr := s.taskManager.CreateTextureSetTasks(ctx, payload.WorldID, payload.X, payload.Y)
-//			if cErr != nil {
-//				return nil, cErr
-//			}
-//
-//			return &mktextr.TextureReferencePayload{}, nil
-//		}
-//
-//		return nil, err
-//	}
-//
-//	return &mktextr.TextureReferencePayload{
-//		ID: &texRef.Id,
-//	}, nil
-//}
+type config struct {
+	MongoUrl            string `env:"MONGO_CONNECTION_STRING" envDefault:"mongodb://localhost:27017"`
+	RedisAddr           string `env:"REDIS_ADDRESS" envDefault:"localhost:6379"`
+	RedisPwd            string `env:"REDIS_PASSWORD" envDefault:""`
+	RedisDb             int    `env:"REDIS_DB" envDefault:"0"`
+	LocalStoreRoot      string `env:"LOCAL_STORE_ROOT" envDefault:"./uploads"`
+	LocalStoreUriPrefix string `env:"LOCAL_STORE_URI_PREFIX" envDefault:"file:///C:/Repositories/obert/mktextr/uploads/"`
+}
 
 // NewMktextr returns the mktextr service implementation.
 func NewMktextr() mktextr.Service {
-	dbContext, err := data_access.NewMongoDbContext(MONGODB_URL)
+	cfg, err := env.ParseAs[config]()
+	if err != nil {
+		panic(err)
+	}
+	dbContext, err := data_access.NewMongoDbContext(cfg.MongoUrl)
 	if err != nil {
 		panic(err)
 	}
 
 	redisClient := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
+		Addr:     cfg.RedisAddr,
+		Password: cfg.RedisPwd,
+		DB:       cfg.RedisDb,
 	})
 
 	taskRepository := data_access.NewRedisTaskRepository(redisClient)
@@ -173,6 +120,6 @@ func NewMktextr() mktextr.Service {
 	return &mktextrsrvc{
 		store:          domain.NewTextureSetStore(repo, cache),
 		taskManager:    domain.NewTaskManager(taskRepository),
-		textureStorage: data_access.NewLocalTextureStorage("./upload"),
+		textureStorage: data_access.NewLocalTextureStorage(cfg.LocalStoreRoot, cfg.LocalStoreUriPrefix),
 	}
 }
